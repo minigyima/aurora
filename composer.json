@@ -1,0 +1,50 @@
+{
+    "name": "minigyima/aurora",
+    "description": "An application framework / starter kit for Laravel that simplifies API development",
+    "type": "library",
+    "version": "0.1.1",
+    "require": {
+        "illuminate/support": ">=10.0",
+        "illuminate/cache": ">=10.0",
+        "illuminate/database": ">=10.0",
+        "illuminate/console": ">=10.0",
+        "spatie/laravel-ignition": ">=1.0",
+        "minigyima/warden": "dev-master",
+        "php": "^8.3",
+        "laravel/octane": "^2.2"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Minigyima\\Aurora\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Máté Gyimesi",
+            "email": "gyim.mate@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Minigyima\\Aurora\\Providers\\AuroraServiceProvider"
+            ],
+            "aliases": {
+                "Aurora": "Minigyima\\Aurora\\Facades\\Aurora"
+            }
+        }
+    },
+    "scripts": {
+        "boot": [
+            "@php artisan aurora:boot --ansi"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/minigyima/warden"
+        }
+    ],
+    "minimum-stability": "stable"
+}
