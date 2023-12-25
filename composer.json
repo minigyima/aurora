@@ -12,9 +12,13 @@
         "minigyima/warden": "dev-master",
         "php": "^8.3",
         "laravel/octane": "^2.2",
-        "spatie/async": "^1.6",
         "spatie/file-system-watcher": "^1.1",
-        "laravel/prompts": "^0.1.13"
+        "laravel/prompts": "^0.1.13",
+        "nette/php-generator": "^4.1",
+        "laravel/sanctum": "^3.3",
+        "symfony/yaml": "^7.0",
+        "laravel/horizon": "^5.21",
+        "ext-pcntl": "*"
     },
     "license": "MIT",
     "autoload": {
@@ -37,12 +41,6 @@
                 "Aurora": "Minigyima\\Aurora\\Facades\\Aurora"
             }
         }
-    },
-    "scripts": {
-        "boot": [
-            "@php artisan aurora:boot --ansi"
-        ]
-
     },
     "repositories": [
         {
