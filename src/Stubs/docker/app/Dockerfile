@@ -1,4 +1,4 @@
-FROM php:8.3-alpine3.19
+FROM php:8.3-fpm-alpine3.19
 
 WORKDIR /srv/www
 #aaa
@@ -54,7 +54,7 @@ RUN MAKEFLAGS="-j$(nproc)" pecl install openswoole-22.1.2
 
 RUN docker-php-ext-enable redis imagick gd dom openswoole
 
-RUN apk add ca-certificates icu-dev
+RUN apk add ca-certificates icu-dev nginx
 
 RUN . /envfile; docker-php-ext-configure intl && docker-php-ext-install -j$PROC_COUNT intl
 

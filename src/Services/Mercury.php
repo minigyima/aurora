@@ -8,7 +8,6 @@ use Minigyima\Aurora\Contracts\AbstractSingleton;
 use Minigyima\Aurora\Traits\VerifiesEnvironment;
 use Minigyima\Aurora\Util\ConsoleLogger;
 use Override;
-use Spatie\Async\Pool;
 use Spatie\Watcher\Watch;
 use Symfony\Component\Process\Process;
 
@@ -22,15 +21,9 @@ class Mercury extends AbstractSingleton
     {
         if (self::runningInMercury()) {
             $this->active = true;
-            $this->createPool();
         } else {
             $this->active = false;
         }
-    }
-
-    private function createPool()
-    {
-        $this->threadPool = Pool::create();
     }
 
     #[Override]
@@ -39,8 +32,9 @@ class Mercury extends AbstractSingleton
         return app(static::class);
     }
 
-    public function boot()
+    public function boot(): int
     {
+        $this->killAurora();
         Artisan::call('config:cache');
         $this->requireActive();
         $name = config('app.name');
@@ -54,16 +48,18 @@ class Mercury extends AbstractSingleton
         ConsoleLogger::log_info('Starting File Watcher...', 'Aurora');
         $watcher = Watch::paths([base_path('.env')]);
 
-        $watcher->onFileUpdated(function (string $file) {
+        $watcher->onFileUpdated(function (string $file) use ($watcher) {
             ConsoleLogger::log_info("File updated: $file --> Restarting Aurora...", 'Mercury');
-            $this->auroraThread->stop();
-            $this->killAurora();
             Artisan::call('config:cache');
-            $this->auroraThread = $this->createAuroraThread();
+            $this->killAurora();
+            $watcher->shouldContinue(fn () => false);
+            $this->auroraThread->stop();
         });
 
         $watcher->start();
         $this->auroraThread->wait();
+
+        return 1;
     }
 
     private function createAuroraThread(): Process

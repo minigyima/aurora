@@ -4,6 +4,7 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
+use Minigyima\Aurora\Util\ResetTerminal;
 
 class AuroraShellCommand extends Command
 {
@@ -41,6 +42,8 @@ class AuroraShellCommand extends Command
             $this->warn('Please make sure that Aurora is running and try again.');
             return 1;
         }
+
+        ResetTerminal::reset();
 
         return 0;
     }

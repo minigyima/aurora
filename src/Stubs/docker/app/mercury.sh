@@ -60,8 +60,9 @@ firstboot() {
 }
 
 boot() {
-    echo "# Handing over control to Aurora...";
-    /usr/local/bin/php artisan mercury:boot
+    echo "# Handing over control to Aurora..."
+    while true; do /usr/local/bin/php artisan mercury:boot && break; done
+
 }
 
 # Totally dumb, and even more unnescessary. To be fair, it does look cool...

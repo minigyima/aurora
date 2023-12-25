@@ -34,10 +34,9 @@ services:
         environment:
             - REDIS_REPLICATION_MODE=master
         volumes:
-
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
-            - ./docker/cache/data:/data
+            - '../../../../../storage/aurora/mercury/cache/data:/data'
             - ./docker/cache:/redis
 
     nginx:
@@ -62,7 +61,7 @@ services:
         image: qoomon/docker-host
         container_name: aurora-router
         hostname: aurora-router
-        cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+        cap_add: ['NET_ADMIN', 'NET_RAW']
         restart: on-failure
         environment:
             - PORTS=9000
@@ -94,4 +93,4 @@ networks:
         driver: bridge
         ipam:
             config:
-                -   subnet: 172.128.3.0/16
+                - subnet: 172.128.3.0/16

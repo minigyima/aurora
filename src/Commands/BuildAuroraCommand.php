@@ -4,6 +4,7 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
+use Minigyima\Aurora\Util\ResetTerminal;
 
 class BuildAuroraCommand extends Command
 {
@@ -40,6 +41,9 @@ class BuildAuroraCommand extends Command
         $process->wait();
         $this->info('Mercury build complete!');
         $this->info('Done! Happy coding!');
+
+        ResetTerminal::reset();
+
         return 0;
     }
 }

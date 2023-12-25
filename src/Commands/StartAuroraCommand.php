@@ -5,6 +5,7 @@ namespace Minigyima\Aurora\Commands;
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
 use Minigyima\Aurora\Traits\InteractsWithDockerManifest;
+use Minigyima\Aurora\Util\ResetTerminal;
 
 class StartAuroraCommand extends Command
 {
@@ -51,8 +52,10 @@ class StartAuroraCommand extends Command
             $this->call('aurora:stop');
         });
 
-
         $process->wait();
+
+        ResetTerminal::reset();
+
         return 0;
     }
 }

@@ -116,7 +116,7 @@ class Aurora extends AbstractSingleton
                    . ' && ' .
                    $this->generateComposePrompt('build');
 
-        return Process::fromShellCommandline($command);
+        return Process::fromShellCommandline($command)->setTimeout(null);
     }
 
     /**
