@@ -4,6 +4,10 @@ namespace Minigyima\Aurora\Contracts;
 
 use Exception;
 
+/**
+ * AbstractSingleton - Abstract class for singletons implemented in Aurora
+ * @package Minigyima\Aurora\Contracts
+ */
 abstract class AbstractSingleton implements ReportsStatus
 {
     /**

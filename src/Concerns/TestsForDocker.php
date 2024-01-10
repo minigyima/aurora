@@ -1,9 +1,10 @@
 <?php
 
-namespace Minigyima\Aurora\Traits;
+namespace Minigyima\Aurora\Concerns;
 
 /**
  * Trait for testing if Docker exists on a given system
+ * @package Minigyima\Aurora\Traits
  */
 trait TestsForDocker
 {

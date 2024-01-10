@@ -3,20 +3,35 @@
 namespace Minigyima\Aurora\Services;
 
 use Artisan;
+use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Contracts\AbstractSingleton;
-use Minigyima\Aurora\Traits\VerifiesEnvironment;
-use Minigyima\Aurora\Util\ConsoleLogger;
+use Minigyima\Aurora\Support\ConsoleLogger;
 use Override;
+use Spatie\Watcher\Exceptions\CouldNotStartWatcher;
 use Spatie\Watcher\Watch;
 use Symfony\Component\Process\Process;
 
+
+/**
+ * Mercury - The Aurora Runtime
+ * @package Minigyima\Aurora\Services
+ * @internal
+ */
 class Mercury extends AbstractSingleton
 {
     use VerifiesEnvironment;
 
+    /**
+     * @var Process
+     * The thread that currently runs Aurora
+     *  - Either Swoole or FPM
+     */
     private Process $auroraThread;
 
+    /**
+     * Mercury constructor.
+     */
     public function __construct()
     {
         if (self::runningInMercury()) {
@@ -26,12 +41,21 @@ class Mercury extends AbstractSingleton
         }
     }
 
+    /**
+     * Returns an instance of the Mercury singleton
+     * @return static
+     */
     #[Override]
     public static function use(): static
     {
         return app(static::class);
     }
 
+    /**
+     * Boot the Aurora runtime
+     * @return int
+     * @throws CouldNotStartWatcher
+     */
     public function boot(): int
     {
         $this->killAurora();
@@ -52,7 +76,7 @@ class Mercury extends AbstractSingleton
             ConsoleLogger::log_info("File updated: $file --> Restarting Aurora...", 'Mercury');
             Artisan::call('config:cache');
             $this->killAurora();
-            $watcher->shouldContinue(fn () => false);
+            $watcher->shouldContinue(fn() => false);
             $this->auroraThread->stop();
         });
 
@@ -62,6 +86,26 @@ class Mercury extends AbstractSingleton
         return 1;
     }
 
+    /**
+     * Kill the Aurora runtime
+     * - This will kill the Aurora thread, no matter if it is FPM or Swoole
+     * @return void
+     */
+    private function killAurora()
+    {
+        ConsoleLogger::log_info('Killing Aurora...', 'Mercury');
+        $process = Process::fromShellCommandline('bash ' . Constants::KILL_SCRIPT_PATH);
+        $process->setTty(true);
+        $process->start();
+        $process->wait();
+    }
+
+    /**
+     * Create the Aurora thread
+     * - This will create a new thread for Aurora to run in, based on the config
+     * @return Process
+     * @see config/aurora.php
+     */
     private function createAuroraThread(): Process
     {
         $thread = Process::fromShellCommandline($this->auroraThreadCommand());
@@ -72,6 +116,12 @@ class Mercury extends AbstractSingleton
         return $thread;
     }
 
+    /**
+     * Get the command to start the Aurora thread
+     * - This will return the command to start the Aurora thread, based on the config
+     * @return string
+     * @see config/aurora.php
+     */
     private function auroraThreadCommand(): string
     {
         $debug_enabled = config('aurora.debug_mode');
@@ -88,15 +138,12 @@ class Mercury extends AbstractSingleton
         }
     }
 
-    private function killAurora()
-    {
-        ConsoleLogger::log_info('Killing Aurora...', 'Mercury');
-        $process = Process::fromShellCommandline('bash ' . Constants::KILL_SCRIPT_PATH);
-        $process->setTty(true);
-        $process->start();
-        $process->wait();
-    }
-
+    /**
+     * Boot the Horizon part of the Aurora runtime
+     * - Also starts a file system watcher to restart Horizon when a Job is changed
+     * @return void
+     * @throws CouldNotStartWatcher
+     */
     public function bootHorizon()
     {
         $this->requireActive();

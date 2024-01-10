@@ -4,8 +4,14 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Mercury;
-use Minigyima\Aurora\Util\ConsoleLogger;
+use Minigyima\Aurora\Support\ConsoleLogger;
 
+/**
+ * MercuryBoot - Command for booting the Mercury process
+ * - A small cli wrapper around Mercury::boot()
+ * @package Minigyima\Aurora\Commands
+ * @see Mercury::boot()
+ */
 class MercuryBoot extends Command
 {
     /**

@@ -4,8 +4,12 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Mercury;
-use Minigyima\Aurora\Util\ConsoleLogger;
+use Minigyima\Aurora\Support\ConsoleLogger;
 
+/**
+ * MercuryBootHorizon - Command for booting the Horizon process in Mercury
+ * @package Minigyima\Aurora\Commands
+ */
 class MercuryBootHorizon extends Command
 {
     /**

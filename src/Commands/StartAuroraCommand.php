@@ -3,10 +3,16 @@
 namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
+use Minigyima\Aurora\Concerns\InteractsWithDockerManifest;
 use Minigyima\Aurora\Services\Aurora;
-use Minigyima\Aurora\Traits\InteractsWithDockerManifest;
-use Minigyima\Aurora\Util\ResetTerminal;
+use Minigyima\Aurora\Support\ResetTerminal;
 
+/**
+ * StartAuroraCommand - Command for starting the Aurora framework
+ * - A small cli wrapper around Aurora::start()
+ * @package Minigyima\Aurora\Commands
+ * @see Aurora::start()
+ */
 class StartAuroraCommand extends Command
 {
     use InteractsWithDockerManifest;

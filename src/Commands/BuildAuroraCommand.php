@@ -4,8 +4,14 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
-use Minigyima\Aurora\Util\ResetTerminal;
+use Minigyima\Aurora\Support\ResetTerminal;
 
+/**
+ * BuildAuroraCommand - Command for building the Aurora framework
+ * - A small cli wrapper around Aurora::build()
+ * @package Minigyima\Aurora\Commands
+ * @see Aurora::build()
+ */
 class BuildAuroraCommand extends Command
 {
     /**

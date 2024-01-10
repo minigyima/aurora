@@ -3,19 +3,18 @@
 namespace Minigyima\Aurora\Models;
 
 use ArrayAccess;
+use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
 use Minigyima\Aurora\Errors\InvalidDockerComposeException;
-use Minigyima\Aurora\Traits\InteractsWIthComposeFiles;
 use Override;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class DockerCompose - Represents a docker-compose.yml file
  * @package Minigyima\Aurora\Models
- *
  */
 class DockerCompose implements ArrayAccess
 {
-    use InteractsWIthComposeFiles;
+    use InteractsWithComposeFiles;
 
     /**
      * The values of the docker-compose.yml file
@@ -54,6 +53,11 @@ class DockerCompose implements ArrayAccess
         $this->props = $this->loadAndValidate();
     }
 
+    /**
+     * Load and validate the docker-compose.yml file
+     * @return array
+     * @throws InvalidDockerComposeException
+     */
     private function loadAndValidate(): array
     {
         if (! file_exists($this->path)) {
@@ -79,6 +83,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Magic method to check if a key exists
      * @param string $key
      * @return bool
      */
@@ -88,6 +93,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Set multiple values
      * @param array $values
      * @return void
      */
@@ -99,6 +105,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Set a value
      * @param string $key
      * @param string $value
      * @return void
@@ -109,6 +116,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Magic method to unset a value
      * @param string $key
      * @return void
      */
@@ -118,6 +126,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Magic method to get a value
      * @param string $key
      * @return string|null
      */
@@ -127,6 +136,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Magic method to set a value
      * @param string $key
      * @param string $value
      * @return void
@@ -137,6 +147,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Write the docker-compose.yml file to disk
      * @return void
      */
     public function write(): void
@@ -146,6 +157,7 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Get the IP address of a service
      * @throws InvalidDockerComposeException
      */
     public function getServiceIp(string $name, string $network): string
@@ -169,6 +181,12 @@ class DockerCompose implements ArrayAccess
         return $networks[$network]['ipv4_address'];
     }
 
+    /**
+     * Get a service
+     * @param string $name
+     * @return array
+     * @throws InvalidDockerComposeException
+     */
     public function getService(string $name): array
     {
         if (! array_key_exists($name, $this->props['services'])) {
@@ -178,35 +196,71 @@ class DockerCompose implements ArrayAccess
         return $this->getServices()['postgres'];
     }
 
+    /**
+     * Get the services described in the docker-compose.yml file
+     * @return array
+     */
     public function getServices(): array
     {
         return $this->props['services'] ?? [];
     }
 
+    /**
+     * Magic method to check if a key exists
+     * @param mixed $offset
+     * @return bool
+     * @see ArrayAccess::offsetExists()
+     */
     #[Override]
     public function offsetExists(mixed $offset): bool
     {
         return isset(array_merge($this->props, $this->dirty)[$offset]);
     }
 
+    /**
+     * Magic method to get a value
+     * @param mixed $offset
+     * @return mixed
+     * @see ArrayAccess::offsetGet()
+     */
     #[Override]
     public function offsetGet(mixed $offset): mixed
     {
         return array_merge($this->props, $this->dirty)[$offset] ?? null;
     }
 
+    /**
+     * Magic method to set a value
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     * @see ArrayAccess::offsetSet()
+     */
     #[Override]
     public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->set($offset, $value);
     }
 
+    /**
+     * Magic method to unset a value
+     * @param mixed $offset
+     * @return void
+     * @see ArrayAccess::offsetUnset()
+     */
     #[Override]
     public function offsetUnset(mixed $offset): void
     {
         unset($this->dirty[$offset]);
     }
 
+    /**
+     * Merges a service configuration with a new one
+     * @param string $service
+     * @param string $key
+     * @param array $new_value
+     * @return void
+     */
     public function mergeKey(string $service, string $key, array $new_value): void
     {
         $services = [...$this->getServices()];

@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\Process;
 
 /**
- * Class PostInstallHandler - Handler for post-install script
+ * PostInstallHandler - Handler for post-install script
  * @package Minigyima\Aurora\Handlers
  * @internal
  */
@@ -18,7 +18,11 @@ class PostInstallHandler
 {
     /**
      * Handler for post-install script
+     * - Called by AuroraServiceProvider in the constructor,
+     *   only runs if the injected marker class hasn't yet
+     *   been autoloaded by Composer.
      * @return void
+     * @internal
      */
     public static function handle(): void
     {
@@ -80,6 +84,7 @@ class PostInstallHandler
     }
 
     /**
+     * Get the logger
      * @return LoggerInterface
      */
     private static function log(): LoggerInterface

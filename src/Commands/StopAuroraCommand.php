@@ -4,8 +4,14 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
-use Minigyima\Aurora\Util\ResetTerminal;
+use Minigyima\Aurora\Support\ResetTerminal;
 
+/**
+ * StopAuroraCommand - Command for stopping the Aurora framework
+ * - A small cli wrapper around Aurora::stop()
+ * @package Minigyima\Aurora\Commands
+ * @see Aurora::stop()
+ */
 class StopAuroraCommand extends Command
 {
     /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace Minigyima\Aurora\Util;
+namespace Minigyima\Aurora\Support;
 
 /**
- * Class StrClean
- * @package Minigyima\Aurora\Util
+ * StrClean - Utility class for cleaning strings
+ * @package Minigyima\Aurora\Support
  */
 class StrClean
 {

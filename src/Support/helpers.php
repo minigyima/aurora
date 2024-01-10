@@ -1,15 +1,24 @@
 <?php
 
-namespace Minigyima\Aurora\Util;
+/**
+ * Helpers - Utility functions that get loaded automatically by AuroraServiceProvider
+ */
+
+namespace Minigyima\Aurora\Support;
 
 # Adapted from StackOverflow
 # http://stackoverflow.com/a/3352564/283851
 # https://gist.github.com/XzaR90/48c6b615be12fa765898
 # Forked from https://gist.github.com/mindplay-dk/a4aad91f5a4f1283a5e2
-
 use FilesystemIterator;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
+use Minigyima\Aurora\Support\Response\AuroraResponse;
+use Minigyima\Aurora\Support\Response\AuroraResponseStatus;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use stdClass;
 
 /**
  * Recursively delete a directory and all of it's contents - e.g.the equivalent of `rm -r` on the command-line.
@@ -53,4 +62,27 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
     }
 
     return true;
+}
+
+/**
+ * Create a new AuroraResponse instance.
+ * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data
+ * @param int $statusCode
+ * @param array $headers
+ * @param int $encodingOptions
+ * @param bool $json
+ * @param AuroraResponseStatus $status
+ * @param string $message
+ * @return AuroraResponse
+ */
+function aurora_response(
+    array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data = [],
+    int                                                       $statusCode = 200,
+    array                                                     $headers = [],
+    int                                                       $encodingOptions = 0,
+    bool                                                      $json = false,
+    AuroraResponseStatus                                      $status = AuroraResponseStatus::SUCCESS,
+    string                                                    $message = 'Success',
+): AuroraResponse {
+    return new AuroraResponse($data, $statusCode, $headers, $encodingOptions, $json, $status, $message);
 }

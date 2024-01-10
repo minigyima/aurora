@@ -4,8 +4,12 @@ namespace Minigyima\Aurora\Commands;
 
 use Illuminate\Console\Command;
 use Minigyima\Aurora\Services\Aurora;
-use Minigyima\Aurora\Util\ResetTerminal;
+use Minigyima\Aurora\Support\ResetTerminal;
 
+/**
+ * AuroraShellCommand - Command for starting a shell inside the Mercury container
+ * @package Minigyima\Aurora\Commands
+ */
 class AuroraShellCommand extends Command
 {
     /**

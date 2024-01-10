@@ -2,22 +2,34 @@
 
 namespace Minigyima\Aurora\Services;
 
+use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
+use Minigyima\Aurora\Concerns\TestsForDocker;
+use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Contracts\AbstractSingleton;
 use Minigyima\Aurora\Errors\CommandNotApplicableException;
 use Minigyima\Aurora\Errors\NoDockerException;
-use Minigyima\Aurora\Traits\InteractsWIthComposeFiles;
-use Minigyima\Aurora\Traits\TestsForDocker;
-use Minigyima\Aurora\Traits\VerifiesEnvironment;
 use Override;
 use Symfony\Component\Process\Process;
 
+/**
+ * Aurora - The Aurora Runtime, used to manage the Aurora Docker environment
+ * @package Minigyima\Aurora\Services
+ * @internal
+ */
 class Aurora extends AbstractSingleton
 {
-    use VerifiesEnvironment, TestsForDocker, InteractsWIthComposeFiles;
+    use VerifiesEnvironment, TestsForDocker, InteractsWithComposeFiles;
 
+    /**
+     * @var bool
+     * Whether or not Aurora is running in Mercury
+     */
     private bool $isMercury = false;
 
+    /**
+     * Aurora constructor.
+     */
     public function __construct()
     {
         if (self::runningInMercury()) {
@@ -30,6 +42,10 @@ class Aurora extends AbstractSingleton
         $this->ensureStorageExists();
     }
 
+    /**
+     * Ensure the storage directory exists
+     * @return void
+     */
     private function ensureStorageExists(): void
     {
         if (! file_exists(base_path(Constants::AURORA_DOCKER_STORAGE_PATH))) {
@@ -45,6 +61,10 @@ class Aurora extends AbstractSingleton
         }
     }
 
+    /**
+     * Returns an instance of the Aurora singleton
+     * @return static
+     */
     #[Override]
     public static function use(): static
     {
@@ -71,6 +91,11 @@ class Aurora extends AbstractSingleton
         return Process::fromShellCommandline($command)->setTimeout(null);
     }
 
+    /**
+     * Generate the compose prompt for use with Docker Compose
+     * @param string $command
+     * @return string
+     */
     private function generateComposePrompt(string $command): string
     {
         $files = [];
@@ -103,6 +128,11 @@ class Aurora extends AbstractSingleton
         return Process::fromShellCommandline($command)->setTimeout(null);
     }
 
+    /**
+     * Build Aurora
+     * @throws CommandNotApplicableException
+     * @throws NoDockerException
+     */
     public function build(): Process
     {
         if ($this->isMercury) {

@@ -5,6 +5,10 @@ namespace Minigyima\Aurora\Config\ConfigManager\Providers;
 use Illuminate\Support\ServiceProvider;
 use Minigyima\Aurora\Config\ConfigManager\Services\ConfigManager;
 
+/**
+ * ConfigServiceProvider - Registers the ConfigManager service
+ * @package Minigyima\Aurora\Config\ConfigManager\Providers
+ */
 class ConfigServiceProvider extends ServiceProvider
 {
     /**
@@ -14,7 +18,7 @@ class ConfigServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(ConfigManager::class, fn () => new ConfigManager());
+        $this->app->singleton(ConfigManager::class, fn() => new ConfigManager());
     }
 
     /**

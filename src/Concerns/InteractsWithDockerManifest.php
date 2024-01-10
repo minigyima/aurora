@@ -1,17 +1,29 @@
 <?php
 
-namespace Minigyima\Aurora\Traits;
+namespace Minigyima\Aurora\Concerns;
 
 use Minigyima\Aurora\Config\Constants;
 
+/**
+ * InteractsWithDockerManifest - Trait for interacting with the docker manifest
+ * @package Minigyima\Aurora\Traits
+ */
 trait InteractsWithDockerManifest
 {
+    /**
+     * Check if the docker manifest has changed
+     * @return bool
+     */
     private function compareWithNew(): bool
     {
         $manifest = $this->makeManifest();
         return $this->compareManifests($manifest);
     }
 
+    /**
+     * Make a manifest of the current docker files
+     * @return array
+     */
     private function makeManifest(): array
     {
         $isPublished = false;
@@ -35,6 +47,11 @@ trait InteractsWithDockerManifest
         return $manifest;
     }
 
+    /**
+     * Compare the current manifest with the stored manifest
+     * @param array $manifest
+     * @return bool
+     */
     private function compareManifests(array $manifest): bool
     {
         $currentManifest = $this->readManifest();
@@ -55,6 +72,10 @@ trait InteractsWithDockerManifest
         return true;
     }
 
+    /**
+     * Read the current manifest
+     * @return array
+     */
     private function readManifest(): array
     {
         $manifestPath = base_path(Constants::AURORA_MANIFEST_PATH);
@@ -65,6 +86,10 @@ trait InteractsWithDockerManifest
         return json_decode(file_get_contents($manifestPath), true);
     }
 
+    /**
+     * Write the current manifest
+     * @return void
+     */
     private function writeManifest()
     {
         $manifest = $this->makeManifest();

@@ -2,15 +2,12 @@
 
 namespace Minigyima\Aurora\Config\ConfigManager\Interfaces;
 
+/**
+ * ConfigInterface - Interface for the config model
+ * @package Minigyima\Aurora\Config\ConfigManager\Interfaces
+ */
 interface ConfigInterface
 {
-    /**
-     * Serialize the current config
-     *
-     * @return string JSON containing the current config
-     */
-    public function serialize(): string;
-
     /**
      * Load config
      *
@@ -25,6 +22,13 @@ interface ConfigInterface
      * @return string JSON object containing the default values
      */
     public static function defaultState(): string;
+
+    /**
+     * Serialize the current config
+     *
+     * @return string JSON containing the current config
+     */
+    public function serialize(): string;
 
     /**
      * Get every config option with their respective values

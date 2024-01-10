@@ -4,19 +4,24 @@ namespace Minigyima\Aurora\Config;
 
 class Constants
 {
-    public const MERCURY_LOGO = 'MERCURY';
-
-    public const MERCURY_GREETING = 'Mercury - Container runtime for Mercury';
-
     /**
      * Path to the aurora storage directory
      */
     public const AURORA_STORAGE_PATH = 'storage/aurora';
 
+    /**
+     * Path to the aurora docker storage directory
+     */
     public const AURORA_DOCKER_STORAGE_PATH = self::AURORA_STORAGE_PATH . '/mercury';
 
+    /**
+     * Path to the aurora docker manifest file
+     */
     public const AURORA_MANIFEST_PATH = self::AURORA_STORAGE_PATH . '/manifest.json';
 
+    /**
+     * Path to the aurora config file
+     */
     public const string CONFIG_FILE_PATH = self::AURORA_STORAGE_PATH . 'config.json';
 
     /**
@@ -32,15 +37,44 @@ class Constants
      */
     public const MARKER_PATH = self::AURORA_STORAGE_PATH . '/AuroraMarker.php';
 
+    /**
+     * Path to the mercury container file
+     */
     public const MERCURY_MARKER = '/mercury.container';
 
+    /**
+     * Prefix mercury uses when locking the first run
+     */
     public const LOCK_PREFIX = 'mercury-';
 
+    /**
+     * Path to the Debug (FPM) boot script
+     */
     public const DEBUG_SCRIPT_PATH = '/mercury_debug.sh';
+
+    /**
+     * Path to the Swoole boot script
+     */
     public const SWOOLE_SCRIPT_PATH = '/mercury_swoole.sh';
 
+    /**
+     * Path to the kill script
+     */
     public const KILL_SCRIPT_PATH = '/mercury_kill.sh';
 
+    /**
+     * The current version of Aurora
+     */
+    public const AURORA_VERSION = '0.0.1';
+
+    /**
+     * The current version of Mercury
+     */
+    public const MERCURY_VERSION = '0.1';
+
+    /**
+     * The scripts that get injected into composer.json
+     */
     public const array INJECTED_SCRIPTS = [
         'shell' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:shell'],
         'start' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:start'],

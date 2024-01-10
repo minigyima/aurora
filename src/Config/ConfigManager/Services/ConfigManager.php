@@ -5,10 +5,22 @@ namespace Minigyima\Aurora\Config\ConfigManager\Services;
 use Minigyima\Aurora\Config\ConfigManager\Models\BaseConfig;
 use Minigyima\Aurora\Config\Constants;
 
+/**
+ * ConfigManager - Manages the config file
+ * @package Minigyima\Aurora\Config\ConfigManager\Services
+ */
 class ConfigManager
 {
+
+    /**
+     * The config model
+     * @var BaseConfig
+     */
     public readonly BaseConfig $config;
 
+    /**
+     * ConfigManager constructor.
+     */
     public function __construct()
     {
         $this->loadConfig();
@@ -16,6 +28,7 @@ class ConfigManager
 
     /**
      * Load config from disk
+     * @return void
      */
     private function loadConfig(): void
     {
@@ -32,6 +45,7 @@ class ConfigManager
 
     /**
      * Get the config model
+     * @return string
      */
     private function getConfigModel(): string
     {
@@ -40,6 +54,7 @@ class ConfigManager
 
     /**
      * Save config to disk
+     * @return void
      */
     public function write(): void
     {
@@ -49,6 +64,7 @@ class ConfigManager
 
     /**
      * Return the currently loaded ConfigManager singleton
+     * @return self
      */
     public static function use(): self
     {

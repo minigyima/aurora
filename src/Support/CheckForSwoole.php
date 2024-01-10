@@ -1,10 +1,14 @@
 <?php
 
-namespace Minigyima\Aurora\Util;
+namespace Minigyima\Aurora\Support;
 
 use Illuminate\Support\Facades\App;
 use Swoole\Http\Server;
 
+/**
+ * CheckForSwoole - Utility class for checking if Swoole is loaded
+ * @package Minigyima\Aurora\Support
+ */
 class CheckForSwoole
 {
     /**

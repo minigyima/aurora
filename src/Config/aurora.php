@@ -6,10 +6,20 @@ return [
     | Frontend enabled
     |--------------------------------------------------------------------------
     |
-    | This option controls whether the frontend is enabled or not
+    | This option controls whether the frontend compiler is enabled or not
     |
     */
     'frontend_enabled' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend rootDir
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the root directory of the frontend compiler
+    |
+    */
+    'frontend_root_dir' => base_path('frontend'),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,14 +42,14 @@ return [
     'sockets_enabled' => true,
 
     /*
-    |--------------------------------------------------------------------------
-    | Auth enabled
-    |--------------------------------------------------------------------------
-    |
-    | This option controls whether Mercury's built in Auth is enabled or not
-    |
-    */
-    'auth_enabled' => true,
+     |--------------------------------------------------------------------------
+     | Refresh Token Expiration
+     |--------------------------------------------------------------------------
+     |
+     | This option controls how long a refresh token is valid for
+     |
+     */
+    'refresh_token_expiration' => 60 * 24 * 30,
 
     /*
     |--------------------------------------------------------------------------
@@ -50,6 +60,16 @@ return [
     |
     */
     'config_manager_enabled' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automatically register exception handler
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether Aurora's exception handler is automatically registered or not
+    |
+    */
+    'automatically_register_exception_handler' => true,
 
     /*
     |--------------------------------------------------------------------------

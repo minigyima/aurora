@@ -5,20 +5,24 @@ namespace Minigyima\Aurora\Config\ConfigManager\Contracts;
 use App\Helpers\ConfigManager\Models\Config;
 use ReflectionClass;
 use ReflectionProperty;
+
 /**
- * Trait for "magical" configuration handling
- * Handles automatic property matching, default state and serialization
+ * ConfigBehaviour - The default ConfigInterface implementation
+ * - Trait for "magical" configuration handling
+ * - Handles automatic property matching, default state and serialization
+ * @package Minigyima\Aurora\Config\ConfigManager\Contracts
+ * @see ConfigInterface
  */
 trait ConfigBehaviour
 {
     /**
-     * Serialize the current config
+     * Get the default config
      *
-     * @return string JSON containing the current config
+     * @return string JSON object containing the default values
      */
-    public function serialize(): string
+    public static function defaultState(): string
     {
-        return json_encode(get_object_vars($this));
+        return json_encode(self::defaultProps());
     }
 
     /**
@@ -36,26 +40,6 @@ trait ConfigBehaviour
         }
 
         return $arr;
-    }
-
-    /**
-     * Get the default config
-     *
-     * @return string JSON object containing the default values
-     */
-    public static function defaultState(): string
-    {
-        return json_encode(self::defaultProps());
-    }
-
-    /**
-     * Get every config option
-     *
-     * @return array list of config options
-     */
-    public function all(): array
-    {
-        return get_object_vars($this);
     }
 
     /**
@@ -80,5 +64,25 @@ trait ConfigBehaviour
         }
 
         return $class;
+    }
+
+    /**
+     * Serialize the current config
+     *
+     * @return string JSON containing the current config
+     */
+    public function serialize(): string
+    {
+        return json_encode(get_object_vars($this));
+    }
+
+    /**
+     * Get every config option
+     *
+     * @return array list of config options
+     */
+    public function all(): array
+    {
+        return get_object_vars($this);
     }
 }

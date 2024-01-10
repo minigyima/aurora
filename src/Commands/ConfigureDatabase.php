@@ -4,21 +4,25 @@ namespace Minigyima\Aurora\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
+use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\DockerCompose;
 use Minigyima\Aurora\Models\EnvironmentFile;
-use Minigyima\Aurora\Traits\InteractsWIthComposeFiles;
-use Minigyima\Aurora\Util\StrClean;
+use Minigyima\Aurora\Support\StrClean;
 use Str;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
-use function Minigyima\Aurora\Util\rrmdir;
+use function Minigyima\Aurora\Support\rrmdir;
 
+/**
+ * ConfigureDatabase - Command for configuring the database
+ * @package Minigyima\Aurora\Commands
+ */
 class ConfigureDatabase extends Command
 {
-    use InteractsWIthComposeFiles;
+    use InteractsWithComposeFiles;
 
     /**
      * The name and signature of the console command.
@@ -66,6 +70,11 @@ class ConfigureDatabase extends Command
         // if(array_key_exists())
     }
 
+    /**
+     * Manual database configuration
+     * @return int
+     * @throws Exception
+     */
     private function manual()
     {
         $ip_address = text(
@@ -92,6 +101,17 @@ class ConfigureDatabase extends Command
         return $this->finish($db_name, $username, $password, $ip_address, $port, $database_driver, false);
     }
 
+    /**
+     * Finish the configuration
+     * @param string $db_name
+     * @param string $username
+     * @param string $password
+     * @param string $ip_addr
+     * @param int $port
+     * @param string $driver
+     * @param bool $write_override
+     * @return int
+     */
     private function finish(
         string $db_name,
         string $username,
@@ -129,6 +149,16 @@ class ConfigureDatabase extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Write to the .env file to configure the database
+     * @param string $db_name
+     * @param string $username
+     * @param string $password
+     * @param mixed $ip_addr
+     * @param int $port
+     * @param string $connection
+     * @return void
+     */
     private function writeEnv(
         string $db_name,
         string $username,
@@ -152,6 +182,13 @@ class ConfigureDatabase extends Command
         $env->write();
     }
 
+    /**
+     * Write to the docker-compose.override.yaml file to configure the database
+     * @param string $db_name
+     * @param string $username
+     * @param string $password
+     * @return void
+     */
     private function writeDockerComposeOverride(string $db_name, string $username, string $password): void
     {
         $override = new DockerCompose(base_path('docker-compose.override.yaml'), true);
@@ -172,6 +209,10 @@ class ConfigureDatabase extends Command
         $override->write();
     }
 
+    /**
+     * Clear the Postgres data
+     * @return void
+     */
     private function clearPostgresData(): void
     {
         $prompt = confirm(
@@ -193,6 +234,11 @@ class ConfigureDatabase extends Command
         $this->info('Successfully cleared Postgres data.');
     }
 
+    /**
+     * Automatic database configuration
+     * @return int
+     * @throws Exception
+     */
     private function automatic()
     {
         $confirm = confirm(
@@ -219,6 +265,7 @@ class ConfigureDatabase extends Command
     }
 
     /**
+     * Get the IP address of the Postgres service
      * @throws Exception
      */
     private function getPostgresIp(): string
@@ -228,6 +275,11 @@ class ConfigureDatabase extends Command
         return $compose->getServiceIp('postgres', 'aurora');
     }
 
+    /**
+     * Semi-automatic database configuration
+     * @return int
+     * @throws Exception
+     */
     private function semiAutomatic()
     {
         $ip_addr = $this->getPostgresIp();

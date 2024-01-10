@@ -1,10 +1,14 @@
 <?php
 
-namespace Minigyima\Aurora\Traits;
+namespace Minigyima\Aurora\Concerns;
 
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Storage\AuroraMarker;
 
+/**
+ * VerifiesEnvironment - Trait for verifying the environment that Aurora is running in
+ * @package Minigyima\Aurora\Traits
+ */
 trait VerifiesEnvironment
 {
     /**
