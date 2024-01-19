@@ -2,13 +2,12 @@
 
 namespace Minigyima\Aurora\Handlers;
 
-use Artisan;
 use Illuminate\Support\Facades\Log;
-use Laravel\Octane\OctaneServiceProvider;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\EnvironmentFile;
 use Nette\PhpGenerator\ClassType;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * PostInstallHandler - Handler for post-install script
@@ -29,7 +28,6 @@ class PostInstallHandler
      */
     public static function handle(bool $force = false): void
     {
-
         $channel = Log::channel('errorlog');
         $backtrace = debug_backtrace();
         $caller = $backtrace[2]['class'];
@@ -66,11 +64,13 @@ class PostInstallHandler
         $env_example->write();
 
         $channel->info('Publishing Octane config');
-        app()->register(OctaneServiceProvider::class);
-        Artisan::call('vendor:publish', [
-            '--tag' => 'octane-config',
-            '--force' => true,
-        ]);
+
+        $process = Process::fromShellCommandline('php artisan octane:install --server=swoole');
+        $process->enableOutput();
+        $process->setTty(true);
+        $process->start();
+        $process->wait();
+
         $channel->info('Published Octane config');
 
         $channel->info('Aurora - Finished running postinst script');
