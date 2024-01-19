@@ -2,18 +2,11 @@
 
 namespace Minigyima\Aurora\Handlers;
 
-use Artisan;
-use Illuminate\Cache\CacheServiceProvider;
-use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\Foundation\Providers\ArtisanServiceProvider;
-use Illuminate\Queue\QueueServiceProvider;
 use Illuminate\Support\Facades\Log;
-use Laravel\Octane\OctaneServiceProvider;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\EnvironmentFile;
 use Nette\PhpGenerator\ClassType;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * PostInstallHandler - Handler for post-install script
@@ -62,26 +55,20 @@ class PostInstallHandler
         $env = new EnvironmentFile();
         $env->set('OCTANE_SERVER', 'swoole');
         $env->set('AURORA_DEBUG', 'false');
+        $env->set('REDIS_HOST', '172.128.4.5');
+        $env->set('QUEUE_CONNECTION', 'redis');
+        $env->set('SESSION_DRIVER', 'redis');
+        $env->set('CACHE_DRIVER', 'redis');
         $env->write();
 
         $env_example = new EnvironmentFile(base_path('.env.example'));
         $env_example->set('OCTANE_SERVER', 'swoole');
         $env_example->set('AURORA_DEBUG', 'false');
+        $env->set('REDIS_HOST', '172.128.4.5');
+        $env->set('QUEUE_CONNECTION', 'redis');
+        $env->set('SESSION_DRIVER', 'redis');
+        $env->set('CACHE_DRIVER', 'redis');
         $env_example->write();
-
-        $channel->info('Publishing Octane config');
-
-        app()->register(QueueServiceProvider::class);
-        app()->register(FilesystemServiceProvider::class);
-        app()->register(CacheServiceProvider::class);
-        app()->register(ArtisanServiceProvider::class);
-        app()->register(OctaneServiceProvider::class);
-
-        Artisan::call('list', [], new ConsoleOutput());
-
-        dd('help');
-
-        $channel->info('Published Octane config');
 
         $channel->info('Aurora - Finished running postinst script');
     }
