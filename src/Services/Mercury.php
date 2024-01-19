@@ -171,9 +171,9 @@ class Mercury extends AbstractSingleton
             $thread->start();
         });
 
-        $watcher->start();
-
         $thread->start();
+
+        $watcher->start();
         $thread->wait();
     }
 }
