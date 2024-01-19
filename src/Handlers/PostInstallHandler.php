@@ -2,12 +2,13 @@
 
 namespace Minigyima\Aurora\Handlers;
 
+use Artisan;
 use Illuminate\Support\Facades\Log;
+use Laravel\Octane\OctaneServiceProvider;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\EnvironmentFile;
 use Nette\PhpGenerator\ClassType;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Process\Process;
 
 /**
  * PostInstallHandler - Handler for post-install script
@@ -21,12 +22,24 @@ class PostInstallHandler
      * - Called by AuroraServiceProvider in the constructor,
      *   only runs if the injected marker class hasn't yet
      *   been autoloaded by Composer.
+     *  - Only runs if called by Laravel's auto-discovery mechanism
+     * @param bool $force
      * @return void
      * @internal
      */
-    public static function handle(): void
+    public static function handle(bool $force = false): void
     {
+
         $channel = Log::channel('errorlog');
+        $backtrace = debug_backtrace();
+        $caller = $backtrace[2]['class'];
+        if ($caller !== 'Illuminate\Foundation\ProviderRepository' && ! $force) {
+            $channel->info(
+                "Aurora (PostInstHandler) - Not called by Laravel's auto-discovery mechanism, skipping postinst script"
+            );
+            return;
+        }
+
         $channel->info('Aurora - Running postinst script');
         self::writeMarker();
         $channel->info('Patching composer.json');
@@ -39,10 +52,8 @@ class PostInstallHandler
             $composer['scripts'][$key] = $script;
         }
 
-        $process = Process::fromShellCommandline('php artisan octane:install --server swoole');
-        $process->setTty(true);
-        $process->start();
-        $process->wait();
+        file_put_contents($path, json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $channel->info('Patched composer.json');
 
         $env = new EnvironmentFile();
         $env->set('OCTANE_SERVER', 'swoole');
@@ -54,8 +65,14 @@ class PostInstallHandler
         $env_example->set('AURORA_DEBUG', 'false');
         $env_example->write();
 
-        file_put_contents($path, json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        $channel->info('Patched composer.json');
+        $channel->info('Publishing Octane config');
+        app()->register(OctaneServiceProvider::class);
+        Artisan::call('vendor:publish', [
+            '--tag' => 'octane-config',
+            '--force' => true,
+        ]);
+        $channel->info('Published Octane config');
+
         $channel->info('Aurora - Finished running postinst script');
     }
 

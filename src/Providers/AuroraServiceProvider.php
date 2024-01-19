@@ -44,7 +44,10 @@ class AuroraServiceProvider extends ServiceProvider
     public function boot()
     {
         require_once __DIR__ . '/../Support/helpers.php';
-        $this->publishes([__DIR__ . '/../Stubs/docker' => base_path('docker')], 'aurora-docker');
+
+        $this->publish();
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
+
         $this->loadCommands();
         $this->registerComponents();
         AboutCommand::add(
@@ -55,14 +58,30 @@ class AuroraServiceProvider extends ServiceProvider
                 'Mercury Runtime Version' => Constants::MERCURY_VERSION,
                 'Warden' => config('aurora.warden_enabled') ? 'Enabled' : 'Disabled',
                 'Config Manager' => config('aurora.config_manager_enabled') ? 'Enabled' : 'Disabled',
-            ],
-            'asd'
+            ]
         );
 
 
     }
 
-    private function loadCommands()
+    private function publish(): void
+    {
+        $this->publishes([__DIR__ . '/../Stubs/docker' => base_path('docker')], 'aurora-docker');
+        $this->publishes([__DIR__ . '/../Stubs/docker-compose.stub.yml' => base_path('docker-compose.yml')],
+            'aurora-docker');
+        $this->publishes(
+            [
+                __DIR__ . '/../Stubs//docker-compose-override.yml.example' => base_path(
+                    'docker-compose.override.yml.example'
+                )
+            ],
+            'aurora-docker'
+        );
+
+        $this->publishes([__DIR__ . '/../Config/aurora.php' => config_path('aurora.php')], 'aurora-config');
+    }
+
+    private function loadCommands(): void
     {
         $this->commands([
             AuroraShellCommand::class,

@@ -20,6 +20,41 @@ services:
             - postgres
             - router
             - redis
+            - queue
+            - cron
+
+    queue:
+        build: ./docker/queue
+        hostname: mercury-horizon
+        container_name: mercury-horizon
+        networks:
+            aurora:
+                ipv4_address: 172.128.4.6
+        tty: true
+        volumes:
+            - '../../../../../:/srv/www/'
+            - '../../../../../storage/aurora/mercury/logs:/var/log'
+            - '../../../../../storage/aurora/mercury/root:/root'
+        depends_on:
+            - postgres
+            - redis
+
+    cron:
+        build: ./docker/cron
+        hostname: mercury-cron
+        container_name: mercury-cron
+        networks:
+            aurora:
+                ipv4_address: 172.128.4.7
+        tty: true
+        volumes:
+            - '../../../../../:/srv/www/'
+            - '../../../../../storage/aurora/mercury/logs:/var/log'
+            - '../../../../../storage/aurora/mercury/root:/root'
+        depends_on:
+            - postgres
+            - redis
+            - queue
 
     redis:
         image: redis:alpine
@@ -61,7 +96,7 @@ services:
         image: qoomon/docker-host
         container_name: aurora-router
         hostname: aurora-router
-        cap_add: ['NET_ADMIN', 'NET_RAW']
+        cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
         restart: on-failure
         environment:
             - PORTS=9000
@@ -93,4 +128,4 @@ networks:
         driver: bridge
         ipam:
             config:
-                - subnet: 172.128.3.0/16
+                -   subnet: 172.128.3.0/16

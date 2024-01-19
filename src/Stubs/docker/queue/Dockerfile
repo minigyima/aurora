@@ -1,7 +1,7 @@
-FROM polaris
-WORKDIR /var/www/polaris
+FROM mercury
+WORKDIR /srv/www/
 
-# Config 'n stuff
-COPY php.ini /usr/local/etc/php/
+RUN pecl uninstall xdebug
+RUN bash /mercury_kill.sh
 
-CMD ["php", "artisan", "horizon"]
+CMD ["php", "artisan", "mercury:boot-horizon"]

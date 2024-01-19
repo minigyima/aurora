@@ -1,0 +1,131 @@
+version: '3.9'
+
+services:
+  mercury:
+    build: ./docker/app
+    hostname: mercury
+    container_name: mercury
+    image: mercury
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.1
+    tty: true
+    expose:
+      - 9000
+    volumes:
+      - './:/srv/www/'
+      - './storage/aurora/mercury/logs:/var/log'
+      - './storage/aurora/mercury/root:/root'
+    depends_on:
+      - postgres
+      - router
+      - redis
+      - queue
+      - cron
+
+  queue:
+    build: ./docker/queue
+    hostname: mercury-horizon
+    container_name: mercury-horizon
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.6
+    tty: true
+    volumes:
+      - './:/srv/www/'
+      - './storage/aurora/mercury/logs:/var/log'
+      - './storage/aurora/mercury/root:/root'
+    depends_on:
+      - postgres
+      - redis
+
+  cron:
+    build: ./docker/cron
+    hostname: mercury-cron
+    container_name: mercury-cron
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.7
+    tty: true
+    volumes:
+      - './:/srv/www/'
+      - './storage/aurora/mercury/logs:/var/log'
+      - './storage/aurora/mercury/root:/root'
+    depends_on:
+      - postgres
+      - redis
+      - queue
+
+  redis:
+    image: redis:alpine
+    container_name: aurora-redis
+    hostname: aurora-redis
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.5
+    ports:
+      - 127.0.0.1:6379:6379
+    command: redis-server /redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    volumes:
+      - './storage/aurora/mercury/logs:/var/log'
+      - './storage/aurora/mercury/root:/root'
+      - './storage/aurora/mercury/cache/data:/data'
+      - ./docker/cache:/redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: aurora-nginx
+    hostname: aurora-nginx
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.2
+    volumes:
+      - './:/srv/www/'
+      - './storage/aurora/mercury/logs:/var/log'
+      - './storage/aurora/mercury/root:/root'
+      - ./docker/web/:/etc/nginx/conf.d/
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - mercury
+
+  router:
+    image: qoomon/docker-host
+    container_name: aurora-router
+    hostname: aurora-router
+    cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+    restart: on-failure
+    environment:
+      - PORTS=9000
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.4
+
+  postgres:
+    image: postgres:alpine
+    restart: on-failure
+    container_name: aurora-postgres
+    hostname: aurora-postgres
+    ports:
+      - 127.0.0.1:5433:5432
+    networks:
+      aurora:
+        ipv4_address: 172.128.4.3
+    volumes:
+      - './storage/aurora/mercury/database:/var/lib/postgresql/data'
+      - './storage/aurora/mercury/root:/root'
+      - './storage/aurora/mercury/logs:/var/log'
+    environment:
+      POSTGRES_USER: CHANGEME
+      POSTGRES_PASSWORD: CHANGEME
+      POSTGRES_DB: aurora
+
+networks:
+  aurora:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.128.3.0/16
