@@ -2,12 +2,18 @@
 
 namespace Minigyima\Aurora\Handlers;
 
+use Artisan;
+use Illuminate\Cache\CacheServiceProvider;
+use Illuminate\Filesystem\FilesystemServiceProvider;
+use Illuminate\Foundation\Providers\ArtisanServiceProvider;
+use Illuminate\Queue\QueueServiceProvider;
 use Illuminate\Support\Facades\Log;
+use Laravel\Octane\OctaneServiceProvider;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\EnvironmentFile;
 use Nette\PhpGenerator\ClassType;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * PostInstallHandler - Handler for post-install script
@@ -65,11 +71,15 @@ class PostInstallHandler
 
         $channel->info('Publishing Octane config');
 
-        $process = Process::fromShellCommandline('php artisan octane:install --server=swoole');
-        $process->enableOutput();
-        $process->setTty(true);
-        $process->start();
-        $process->wait();
+        app()->register(QueueServiceProvider::class);
+        app()->register(FilesystemServiceProvider::class);
+        app()->register(CacheServiceProvider::class);
+        app()->register(ArtisanServiceProvider::class);
+        app()->register(OctaneServiceProvider::class);
+
+        Artisan::call('list', [], new ConsoleOutput());
+
+        dd('help');
 
         $channel->info('Published Octane config');
 
