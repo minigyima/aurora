@@ -52,7 +52,9 @@ RUN MAKEFLAGS="-j$(nproc)" pecl install redis
 RUN MAKEFLAGS="-j$(nproc)" pecl install xdebug
 RUN MAKEFLAGS="-j$(nproc)" pecl install openswoole-22.1.2
 
-RUN docker-php-ext-enable redis imagick gd dom openswoole
+
+RUN docker-php-ext-enable redis gd dom openswoole
+#RUN docker-php-ext-enable redis imagick gd dom openswoole
 
 RUN apk add ca-certificates icu-dev nginx
 
