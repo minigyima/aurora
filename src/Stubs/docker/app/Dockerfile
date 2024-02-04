@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine3.19
+FROM php:8.3.1-fpm-alpine3.19
 
 WORKDIR /srv/www
 #aaa
