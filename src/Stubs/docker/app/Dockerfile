@@ -1,4 +1,4 @@
-FROM php:8.3.0-fpm-alpine3.19
+FROM php:8.3.2-fpm-alpine3.19
 
 WORKDIR /srv/www
 #aaa
@@ -48,7 +48,7 @@ RUN apk --no-cache add pcre-dev imagemagick-dev linux-headers imagemagick-dev ${
 ENV MAKEFLAGS="-j$(nproc)"
 # PECL extensions
 RUN MAKEFLAGS="-j$(nproc)" pecl install redis
-RUN MAKEFLAGS="-j$(nproc)" pecl install imagick
+#RUN MAKEFLAGS="-j$(nproc)" pecl install imagick
 RUN MAKEFLAGS="-j$(nproc)" pecl install xdebug
 RUN MAKEFLAGS="-j$(nproc)" pecl install openswoole-22.1.2
 
