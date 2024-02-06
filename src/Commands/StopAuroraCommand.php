@@ -44,6 +44,15 @@ class StopAuroraCommand extends Command
         });
 
         $process->wait();
+
+        if (stripos($process->getOutput(), 'Cannot connect to the Docker daemon') !== false) {
+            $this->error('Aurora failed to stop');
+            $this->warn(
+                'Please make sure, that your Docker daemon is running and that you have the necessary permissions to run Docker commands'
+            );
+            exit(1);
+        }
+
         $this->info('Aurora stopped!');
         $this->info('Done! Have a nice day!');
 

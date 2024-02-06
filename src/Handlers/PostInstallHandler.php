@@ -52,6 +52,15 @@ class PostInstallHandler
         file_put_contents($path, json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         $channel->info('Patched composer.json');
 
+        $channel->info('Patching .env and .env.example');
+
+        if (! file_exists(base_path('.env'))) {
+            $channel->warning('Aurora - .env file does not exist');
+            $channel->info('Aurora - Copying .env.example to .env');
+            copy(base_path('.env.example'), base_path('.env'));
+        }
+
+        $channel->info('Patching .env...');
         $env = new EnvironmentFile();
         $env->set('OCTANE_SERVER', 'swoole');
         $env->set('AURORA_DEBUG', 'false');
@@ -61,6 +70,7 @@ class PostInstallHandler
         $env->set('CACHE_DRIVER', 'redis');
         $env->write();
 
+        $channel->info('Patching .env.example...');
         $env_example = new EnvironmentFile(base_path('.env.example'));
         $env_example->set('OCTANE_SERVER', 'swoole');
         $env_example->set('AURORA_DEBUG', 'false');

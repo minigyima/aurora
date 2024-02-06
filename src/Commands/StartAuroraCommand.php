@@ -47,6 +47,7 @@ class StartAuroraCommand extends Command
         pcntl_async_signals(true);
         $aurora = Aurora::use();
 
+        $this->info('Invoking Docker Compose...');
         $process = $aurora->start();
         $process->setPty(true);
         $process->start(function ($type, $buffer) {
@@ -59,6 +60,14 @@ class StartAuroraCommand extends Command
         });
 
         $process->wait();
+
+        if (stripos($process->getOutput(), 'Cannot connect to the Docker daemon') !== false) {
+            $this->error('Aurora failed to start');
+            $this->warn(
+                'Please make sure, that your Docker daemon is running and that you have the necessary permissions to run Docker commands'
+            );
+            exit(1);
+        }
 
         ResetTerminal::reset();
 
