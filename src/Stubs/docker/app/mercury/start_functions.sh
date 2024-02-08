@@ -48,17 +48,20 @@ READY=0
 
 firstboot_db() {
     log_trace "Checking if this database has been prepared..."
+
     if [ ! -f "/root/mercury-db-$database_hash.lock" ]; then
         log_info "Preparing database for first run..."
-        log_trace "Waiting for database to be ready..."
-        while [ "$READY" -eq 0 ]; do
-            if pg_isready -d "postgres://$database_host";
-            then READY=1;
-            else log_trace "Database not ready yet, waiting for 1 seconds...";
-            fi
-            sleep 1
-        done
-        log_info "Database is ready, migrating"
+        if [ "$database_driver" == "pgsql" ]; then
+                log_trace "Waiting for database to be ready..."
+                       while [ "$READY" -eq 0 ]; do
+                           if pg_isready -d "postgres://$database_host";
+                           then READY=1;
+                           else log_trace "Database not ready yet, waiting for 1 seconds...";
+                           fi
+                           sleep 1
+                       done
+                       log_info "Database is ready, migrating"
+        fi
         laravel_migrate
         set_db_lock
     fi
