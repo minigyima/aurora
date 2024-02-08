@@ -55,7 +55,8 @@ class StartAuroraCommand extends Command
         });
 
         pcntl_signal(SIGINT, function () use ($process) {
-            $process->signal(SIGTERM);
+            $process->stop(0);
+            //$process->signal(SIGTERM);
             $this->call('aurora:stop');
         });
 
