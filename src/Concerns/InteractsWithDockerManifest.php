@@ -3,6 +3,7 @@
 namespace Minigyima\Aurora\Concerns;
 
 use Minigyima\Aurora\Config\Constants;
+use Minigyima\Aurora\Support\ConsoleLogger;
 
 /**
  * InteractsWithDockerManifest - Trait for interacting with the docker manifest
@@ -29,22 +30,44 @@ trait InteractsWithDockerManifest
         $isPublished = false;
         if (file_exists(base_path('docker'))) {
             $files = scandir(base_path('docker/app'));
+            ConsoleLogger::log_warning('Using published docker files', 'InteractsWithDockerManifest::makeManifest');
             $isPublished = true;
         } else {
             $files = scandir(__DIR__ . '/../Stubs/docker/app');
         }
 
-        $files = array_filter($files, function ($file) {
-            return ! in_array($file, ['.', '..', '.gitkeep', 'gitignore']);
-        });
+        return $this->scan_files_hash($files, $isPublished);
+    }
 
+    /**
+     * Scan the files and hash them
+     * @param array $files
+     * @param bool $isPublished
+     * @return array
+     */
+    private function scan_files_hash(array $files, bool $isPublished = false, bool $is_subdir = false): array
+    {
+        $files = $this->filter_files($files);
         $manifest = [];
         foreach ($files as $file) {
             $path = $isPublished ? base_path('docker/app/' . $file) : __DIR__ . '/../Stubs/docker/app/' . $file;
+            if (is_dir($path)) {
+                $files = $this->filter_files(scandir($path));
+                $files = array_map(fn($current_file) => $file . '/' . $current_file, $files);
+                $manifest = array_merge($manifest, $this->scan_files_hash($files, $isPublished, true));
+                continue;
+            }
             $manifest[$file] = hash_file('sha256', $path);
         }
 
         return $manifest;
+    }
+
+    private function filter_files(array $files): array
+    {
+        return array_filter($files, function ($file) {
+            return ! in_array($file, ['.', '..', '.gitkeep', 'gitignore']);
+        });
     }
 
     /**

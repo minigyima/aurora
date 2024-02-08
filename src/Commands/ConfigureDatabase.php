@@ -140,7 +140,7 @@ class ConfigureDatabase extends Command
         $this->writeEnv($db_name, $username, $password, $ip_addr);
 
         if ($write_override) {
-            $this->info('Writing to docker-compose.override.yaml...');
+            $this->info('Writing to docker-compose.override.yml...');
             $this->writeDockerComposeOverride($db_name, $username, $password);
             $this->clearPostgresData();
         }
@@ -183,7 +183,7 @@ class ConfigureDatabase extends Command
     }
 
     /**
-     * Write to the docker-compose.override.yaml file to configure the database
+     * Write to the docker-compose.override.yml file to configure the database
      * @param string $db_name
      * @param string $username
      * @param string $password
@@ -191,13 +191,13 @@ class ConfigureDatabase extends Command
      */
     private function writeDockerComposeOverride(string $db_name, string $username, string $password): void
     {
-        $override = new DockerCompose(base_path('docker-compose.override.yaml'), true);
+        $override = new DockerCompose(base_path('docker-compose.override.yml'), true);
 
-        if (file_exists(base_path('docker-compose.override.yaml'))) {
+        if (file_exists(base_path('docker-compose.override.yml'))) {
             $this->warn(
-                'docker-compose.override.yaml already exists. Renaming to docker-compose.override.aurora.bak...'
+                'docker-compose.override.yml already exists. Renaming to docker-compose.override.aurora.bak...'
             );
-            rename(base_path('docker-compose.override.yaml'), base_path('docker-compose.override.aurora.bak'));
+            rename(base_path('docker-compose.override.yml'), base_path('docker-compose.override.aurora.bak'));
         }
 
         $override->mergeKey('postgres', 'environment', [
