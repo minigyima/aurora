@@ -15,7 +15,7 @@ class GitHelper
      */
     public static function isRepo(string $repo_path): bool
     {
-        return 0 === (int) shell_exec("git -C $repo_path rev-parse");
+        return '' == shell_exec("git -C $repo_path rev-parse");
     }
 
     /**
@@ -25,7 +25,7 @@ class GitHelper
      */
     public static function isDirty(string $repo_path): bool
     {
-        return 0 !== (int) shell_exec("git -C $repo_path status --porcelain");
+        return '' != shell_exec("git -C $repo_path status --porcelain");
     }
 
     /**

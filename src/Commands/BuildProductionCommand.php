@@ -94,6 +94,7 @@ class BuildProductionCommand extends Command
         ConsoleLogger::log_trace('Copying source code to temporary directory...', 'BuildProductionCommand');
         mkdir($temp_path);
         rsync_repo_ignore($base_path, $temp_path);
+        ConsoleLogger::log_success('Finished copying source code to temporary directory', 'BuildProductionCommand');
 
         return self::SUCCESS;
     }
