@@ -9,7 +9,6 @@
         "illuminate/database": ">=10.0",
         "illuminate/console": ">=10.0",
         "spatie/laravel-ignition": ">=1.0",
-        "minigyima/warden": "dev-master",
         "php": "^8.3",
         "laravel/octane": "^2.2",
         "spatie/file-system-watcher": "^1.1",
@@ -42,11 +41,5 @@
             }
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/minigyima/warden"
-        }
-    ],
     "minimum-stability": "stable"
 }

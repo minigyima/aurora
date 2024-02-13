@@ -29,7 +29,7 @@ return [
     | This option controls whether Warden is enabled or not
     |
     */
-    'warden_enabled' => true,
+    'warden_enabled' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -37,9 +37,54 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option controls whether Sockets are enabled or not (Soketi)
+    | WARNING: This option becomes ineffective after the 'aurora-docker' assets are published
     |
     */
-    'sockets_enabled' => true,
+    'sockets_enabled' => env('AURORA_SOCKETS_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redis enabled
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether the Redis container is enabled or not
+    | WARNING: This option becomes ineffective after the 'aurora-docker' assets are published
+    |
+    */
+    'redis_enabled' => env('AURORA_REDIS_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Queue enabled
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether the Horizon queue worker container is enabled or not
+    | WARNING: This option becomes ineffective after the 'aurora-docker' assets are published
+    |
+    */
+    'queue_enabled' => env('AURORA_QUEUE_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database enabled
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether the Postgres database container is enabled or not
+    | WARNING: This option becomes ineffective after the 'aurora-docker' assets are published
+    |
+    */
+    'database_enabled' => env('AURORA_DATABASE_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scheduler enabled
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether the Cron container is enabled or not
+    | WARNING: This option becomes ineffective after the 'aurora-docker' assets are published
+    |
+    */
+    'scheduler_enabled' => env('AURORA_SCHEDULER_ENABLED', true),
 
     /*
      |--------------------------------------------------------------------------
@@ -56,7 +101,7 @@ return [
     | ConfigManager enabled
     |--------------------------------------------------------------------------
     |
-    | This option controls whether Mercury's ConfigManager is enabled or not
+    | This option controls whether Aurora's ConfigManager is enabled or not
     |
     */
     'config_manager_enabled' => true,
@@ -87,8 +132,9 @@ return [
     | Config Model
     |--------------------------------------------------------------------------
     |
-    | This option controls which model Mercury will use to manage its config
+    | This option controls which model Aurora will use to manage its config
     |
     */
     'config_model' => Minigyima\Aurora\Config\ConfigManager\Models\BaseConfig::class,
+
 ];

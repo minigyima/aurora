@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Minigyima\Aurora\Commands\AuroraShellCommand;
 use Minigyima\Aurora\Commands\BuildAuroraCommand;
 use Minigyima\Aurora\Commands\ConfigureDatabase;
+use Minigyima\Aurora\Commands\ConfigureSoketiCommand;
 use Minigyima\Aurora\Commands\MercuryBoot;
 use Minigyima\Aurora\Commands\MercuryBootHorizon;
 use Minigyima\Aurora\Commands\StartAuroraCommand;
@@ -90,11 +91,12 @@ class AuroraServiceProvider extends ServiceProvider
             BuildAuroraCommand::class,
             ConfigureDatabase::class,
             MercuryBootHorizon::class,
-            MercuryBoot::class
+            MercuryBoot::class,
+            ConfigureSoketiCommand::class,
         ]);
     }
 
-    private function registerComponents()
+    private function registerComponents(): void
     {
         if (config('aurora.config_manager_enabled')) {
             $this->app->register(ConfigServiceProvider::class);

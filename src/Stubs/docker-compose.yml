@@ -16,11 +16,7 @@ services:
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         depends_on:
-            - postgres
             - router
-            - redis
-            - queue
-            - cron
 
     queue:
         build: ./docker/queue
@@ -33,9 +29,8 @@ services:
             - '../../../../../:/srv/www/'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
-        depends_on:
-            - postgres
-            - redis
+        profiles:
+            - queue
 
     cron:
         build: ./docker/cron
@@ -48,10 +43,8 @@ services:
             - '../../../../../:/srv/www/'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
-        depends_on:
-            - postgres
-            - redis
-            - queue
+        profiles:
+            - scheduler
 
     redis:
         image: redis:alpine
@@ -69,6 +62,8 @@ services:
             - '../../../../../storage/aurora/mercury/root:/root'
             - '../../../../../storage/aurora/mercury/cache/data:/data'
             - ./docker/cache:/redis
+        profiles:
+            - redis
 
     nginx:
         image: nginx:alpine
@@ -98,6 +93,23 @@ services:
             aurora:
                 ipv4_address: 172.128.4.4
 
+    soketi:
+        image: quay.io/soketi/soketi:1.0-16-alpine
+        hostname: aurora-soketi
+        restart: on-failure
+        volumes:
+            - '../../../../../storage/aurora/mercury/logs:/var/log'
+            - '../../../../../storage/aurora/mercury/root:/root'
+            - '../../../../../storage/aurora/soketi:/soketi'
+        networks:
+            aurora:
+                ipv4_address: 172.128.4.8
+        command:
+            - exit 1
+        profiles:
+            - sockets
+        entrypoint: [ "sh", "-c", "touch /soketi/config.json && node /app/bin/server.js start --config /soketi/config.json" ]
+
     postgres:
         image: postgres:alpine
         restart: on-failure
@@ -115,10 +127,12 @@ services:
             POSTGRES_USER: CHANGEME
             POSTGRES_PASSWORD: CHANGEME
             POSTGRES_DB: aurora
+        profiles:
+            - database
 
 networks:
     aurora:
         driver: bridge
         ipam:
             config:
-                -   subnet: 172.128.3.0/16
+                -   subnet: 172.128.0.0/16

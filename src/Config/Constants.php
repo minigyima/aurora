@@ -25,6 +25,11 @@ class Constants
     public const string CONFIG_FILE_PATH = self::AURORA_STORAGE_PATH . 'config.json';
 
     /**
+     * Path to the aurora soketi config file
+     */
+    public const string SOKETI_CONFIG_FILE_PATH = self::AURORA_STORAGE_PATH . '/soketi/config.json';
+
+    /**
      * Marker class name
      */
     public const MARKER = 'AuroraMarker';
@@ -72,13 +77,23 @@ class Constants
      */
     public const MERCURY_VERSION = '0.1';
 
+    public const HORIZON_REDIS_MAX_RETRIES = 5;
+
     /**
      * The scripts that get injected into composer.json
      */
     public const array INJECTED_SCRIPTS = [
         'shell' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:shell'],
-        'start' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:start'],
+        'start' => [
+            "Composer\\Config::disableProcessTimeout",
+            '@php artisan config:clear',
+            '@php artisan aurora:start'
+        ],
         'stop' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:stop'],
-        'build' => ["Composer\\Config::disableProcessTimeout", '@php artisan aurora:build'],
+        'build' => [
+            "Composer\\Config::disableProcessTimeout",
+            '@php artisan config:clear',
+            '@php artisan aurora:build'
+        ],
     ];
 }

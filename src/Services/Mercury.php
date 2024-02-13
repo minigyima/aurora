@@ -3,9 +3,12 @@
 namespace Minigyima\Aurora\Services;
 
 use Artisan;
+use Exception;
+use Illuminate\Support\Facades\Redis;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Contracts\AbstractSingleton;
+use Minigyima\Aurora\Errors\HorizonRedisUnreachableException;
 use Minigyima\Aurora\Support\ConsoleLogger;
 use Override;
 use Spatie\Watcher\Exceptions\CouldNotStartWatcher;
@@ -143,10 +146,13 @@ class Mercury extends AbstractSingleton
      * - Also starts a file system watcher to restart Horizon when a Job is changed
      * @return void
      * @throws CouldNotStartWatcher
+     * @throws HorizonRedisUnreachableException
+     * @throws Exception
      */
-    public function bootHorizon()
+    public function bootHorizon(): void
     {
         $this->requireActive();
+        $this->checkHorizonRedis();
         $thread = new Process(['php', 'artisan', 'horizon']);
 
         $thread->setTty(true);
@@ -175,5 +181,42 @@ class Mercury extends AbstractSingleton
 
         $watcher->start();
         $thread->wait();
+    }
+
+    /**
+     * Check if the Redis server used by Horizon is running
+     * @return void
+     * @throws HorizonRedisUnreachableException
+     */
+    private function checkHorizonRedis(): void
+    {
+        $max_tries = Constants::HORIZON_REDIS_MAX_RETRIES;
+        $counter = 0;
+
+        ConsoleLogger::log_info('Pinging Redis server...', 'Mercury');
+        ConsoleLogger::log_trace('Max tries: ' . $max_tries, 'Mercury');
+        $connection = config('queue.connections.redis.connection');
+        ConsoleLogger::log_info('Using connection: ' . $connection, 'Mercury');
+
+        while ($counter < $max_tries) {
+            try {
+                $connection = Redis::connection($connection);
+
+                if ($connection->ping()) {
+                    ConsoleLogger::log_success('Redis server is running.', 'Mercury');
+                    return;
+                } else {
+                    ConsoleLogger::log_error('Redis server is unreachable', 'Mercury');
+                }
+            } catch (Exception $e) {
+                ConsoleLogger::log_error('Redis server is unreachable', 'Mercury');
+            }
+
+            $counter++;
+            sleep(1);
+        }
+
+        ConsoleLogger::log_error('Redis server is unreachable', 'Mercury');
+        throw new HorizonRedisUnreachableException('The Redis server used by Horizon is unreachable.');
     }
 }

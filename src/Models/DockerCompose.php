@@ -157,6 +157,42 @@ class DockerCompose implements ArrayAccess
     }
 
     /**
+     * Get the networks for a service
+     * @param string $service_name
+     * @return array
+     * @throws InvalidDockerComposeException
+     */
+    public function getNetworksForService(string $service_name): array
+    {
+        $service = $this->getService($service_name);
+        return array_keys($service['networks']);
+    }
+
+    /**
+     * Get a service
+     * @param string $name
+     * @return array
+     * @throws InvalidDockerComposeException
+     */
+    public function getService(string $name): array
+    {
+        if (! array_key_exists($name, $this->props['services'])) {
+            throw new InvalidDockerComposeException("Service $name does not exist");
+        }
+
+        return $this->getServices()[$name];
+    }
+
+    /**
+     * Get the services described in the docker-compose.yml file
+     * @return array
+     */
+    public function getServices(): array
+    {
+        return $this->props['services'] ?? [];
+    }
+
+    /**
      * Get the IP address of a service
      * @throws InvalidDockerComposeException
      */
@@ -179,30 +215,6 @@ class DockerCompose implements ArrayAccess
         }
 
         return $networks[$network]['ipv4_address'];
-    }
-
-    /**
-     * Get a service
-     * @param string $name
-     * @return array
-     * @throws InvalidDockerComposeException
-     */
-    public function getService(string $name): array
-    {
-        if (! array_key_exists($name, $this->props['services'])) {
-            throw new InvalidDockerComposeException("Service $name does not exist");
-        }
-
-        return $this->getServices()['postgres'];
-    }
-
-    /**
-     * Get the services described in the docker-compose.yml file
-     * @return array
-     */
-    public function getServices(): array
-    {
-        return $this->props['services'] ?? [];
     }
 
     /**

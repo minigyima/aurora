@@ -62,4 +62,17 @@ class ConsoleLogger
         $formatter = new OutputFormatterStyle('red', 'default', ['bold']);
         fwrite(STDERR, $formatter->apply($logMsg));
     }
+
+    /**
+     * Log a trace message
+     * @param string $message
+     * @param string $sender
+     * @return void
+     */
+    public static function log_trace(string $message, string $sender = 'Aurora'): void
+    {
+        $logMsg = date('Y-m-d H:i:s') . " [trace] @ $sender: $message\n";
+        $formatter = new OutputFormatterStyle('magenta', 'default', ['bold']);
+        fwrite(STDERR, $formatter->apply($logMsg));
+    }
 }

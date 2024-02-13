@@ -9,6 +9,7 @@ use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Contracts\AbstractSingleton;
 use Minigyima\Aurora\Errors\CommandNotApplicableException;
 use Minigyima\Aurora\Errors\NoDockerException;
+use Minigyima\Aurora\Support\ConsoleLogger;
 use Override;
 use Symfony\Component\Process\Process;
 
@@ -98,6 +99,7 @@ class Aurora extends AbstractSingleton
      */
     private function generateComposePrompt(string $command): string
     {
+        ConsoleLogger::log_info('Generating compose prompt for command: ' . $command);
         $files = [];
         $name = strtolower(config('app.name'));
 
@@ -111,7 +113,37 @@ class Aurora extends AbstractSingleton
             $files[] = base_path('docker-compose.override.yml');
         }
 
-        return 'docker compose -f ' . implode(' -f ', $files) . ' -p ' . $name . ' ' . $command;
+        $profiles = [];
+        if (config('aurora.sockets_enabled')) {
+            $profiles[] = 'sockets';
+        }
+
+        if (config('aurora.redis_enabled')) {
+            $profiles[] = 'redis';
+        }
+
+        if (config('aurora.database_enabled')) {
+            $profiles[] = 'database';
+        }
+
+        if (config('aurora.queue_enabled')) {
+            $profiles[] = 'queue';
+        }
+
+        if (config('aurora.scheduler_enabled')) {
+            $profiles[] = 'scheduler';
+        }
+
+        $profile_str = '--profile ' . implode(' --profile ', $profiles);
+        $file_str = '-f ' . implode(' -f ', $files);
+
+        ConsoleLogger::log_trace('Using compose files: ' . implode(', ', $files));
+        ConsoleLogger::log_trace('Using profiles: ' . implode(', ', $profiles));
+
+        $command = "docker compose $file_str $profile_str -p $name $command";
+        ConsoleLogger::log_trace('Using compose command: ' . $command);
+
+        return trim($command);
     }
 
     /**

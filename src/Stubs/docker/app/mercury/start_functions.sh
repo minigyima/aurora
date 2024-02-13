@@ -16,7 +16,7 @@ swoole_start() {
 debug_start() {
     log_info "Starting aurora in debug mode..."
     log_trace "Enabling Xdebug..."
-    docker-php-ext-enable xdebug
+    echo "zend_extension=xdebug" > /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
     touch /var/log/xdebug.log
 
     log_trace "Setting up supervisord..."

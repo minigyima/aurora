@@ -15,12 +15,12 @@ trait InteractsWithComposeFiles
     private static function getCurrentComposeFile(): string
     {
         if (file_exists(base_path('docker-compose.yml'))) {
-            $path = base_path('docker-compose.yml');
+            $path = realpath(base_path('docker-compose.yml'));
         } else {
             if (file_exists(base_path('docker-compose.yaml'))) {
-                $path = base_path('docker-compose.yaml');
+                $path = realpath(base_path('docker-compose.yaml'));
             } else {
-                $path = __DIR__ . '/../Stubs/docker-compose.yml';
+                $path = realpath(__DIR__ . '/../Stubs/docker-compose.yml');
             }
         }
 
