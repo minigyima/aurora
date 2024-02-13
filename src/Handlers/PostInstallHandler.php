@@ -5,6 +5,7 @@ namespace Minigyima\Aurora\Handlers;
 use Illuminate\Support\Facades\Log;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\EnvironmentFile;
+use Minigyima\Aurora\Support\GitHelper;
 use Nette\PhpGenerator\ClassType;
 use Psr\Log\LoggerInterface;
 
@@ -49,6 +50,14 @@ class PostInstallHandler
             $composer['scripts'][$key] = $script;
         }
 
+        if (isset(
+                $composer['scripts']['post-update-cmd']
+            ) &&
+            ! in_array('@php artisan aurora:update', $composer['scripts']['post-update-cmd'])
+        ) {
+            $composer['scripts']['post-update-cmd'][] = '@php artisan aurora:update';
+        }
+
         file_put_contents($path, json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         $channel->info('Patched composer.json');
 
@@ -79,6 +88,9 @@ class PostInstallHandler
         $env->set('SESSION_DRIVER', 'redis');
         $env->set('CACHE_DRIVER', 'redis');
         $env_example->write();
+
+        $channel->info('Aurora - Adding files to .gitignore');
+        self::initGitIgnore();
 
         $channel->info('Aurora - Finished running postinst script');
     }
@@ -114,5 +126,31 @@ class PostInstallHandler
     private static function log(): LoggerInterface
     {
         return Log::channel('errorlog');
+    }
+
+    /**
+     * Initialize .gitignore
+     * @return void
+     */
+    public static function initGitIgnore()
+    {
+        if (! GitHelper::isRepo(base_path())) {
+            return;
+        }
+        $ignored_files = GitHelper::getIgnoredFiles(base_path());
+
+        $ignored_files_aux = [];
+        foreach (Constants::IGNORED_FILES as $file) {
+            if (! in_array(trim($file, '/'), $ignored_files)) {
+                $ignored_files_aux[] = $file;
+            }
+        }
+
+        if (file_exists(base_path('.gitignore'))) {
+            $current_contents = file_get_contents(base_path('.gitignore'));
+            $ignored_files_aux = array_merge(explode("\n", trim($current_contents)), $ignored_files_aux);
+        }
+
+        file_put_contents(base_path('.gitignore'), implode("\n", $ignored_files_aux) . PHP_EOL);
     }
 }

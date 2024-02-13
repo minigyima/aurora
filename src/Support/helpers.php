@@ -19,6 +19,7 @@ use Minigyima\Aurora\Support\Response\AuroraResponseStatus;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use stdClass;
+use Symfony\Component\Process\Process;
 
 /**
  * Recursively delete a directory and all of it's contents - e.g.the equivalent of `rm -r` on the command-line.
@@ -51,9 +52,16 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
                 return false;
             }
         } else {
-            if (unlink($fileInfo->getRealPath()) === false) {
-                return false;
+            if ($fileInfo->isLink()) {
+                if (unlink($fileInfo->getPathName()) === false) {
+                    return false;
+                }
+            } else {
+                if (unlink($fileInfo->getRealPath()) === false) {
+                    return false;
+                }
             }
+
         }
     }
 
@@ -85,4 +93,23 @@ function aurora_response(
     string                                                    $message = 'Success',
 ): AuroraResponse {
     return new AuroraResponse($data, $statusCode, $headers, $encodingOptions, $json, $status, $message);
+}
+
+function rsync_repo_ignore(string $source, string $destination)
+{
+    $excluded = GitHelper::getIgnoredFiles($source);
+    $excluded = array_map(fn($item) => "'" . rtrim($item, '/') . "'", $excluded);
+
+    $excluded = implode(',', $excluded);
+    $excluded = "--exclude={{$excluded}}";
+
+    $command = "rsync -avz --progress $excluded $source/ $destination";
+
+    $process = Process::fromShellCommandline($command);
+    $process->setPty(true);
+    $process->start(function ($type, $buffer) {
+        ConsoleLogger::log_trace($buffer, 'BuildProductionCommand --> rsync_repo_ignore');
+    });
+
+    return $process->wait();
 }

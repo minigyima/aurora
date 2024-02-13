@@ -10,6 +10,11 @@ class Constants
     public const AURORA_STORAGE_PATH = 'storage/aurora';
 
     /**
+     * Temp path for building the production docker image
+     */
+    public const AURORA_TEMP_PATH = self::AURORA_STORAGE_PATH . '/temp';
+
+    /**
      * Path to the aurora docker storage directory
      */
     public const AURORA_DOCKER_STORAGE_PATH = self::AURORA_STORAGE_PATH . '/mercury';
@@ -75,7 +80,7 @@ class Constants
     /**
      * The current version of Mercury
      */
-    public const MERCURY_VERSION = '0.1';
+    public const MERCURY_VERSION = '0.2';
 
     public const HORIZON_REDIS_MAX_RETRIES = 5;
 
@@ -95,5 +100,13 @@ class Constants
             '@php artisan config:clear',
             '@php artisan aurora:build'
         ],
+    ];
+
+    public const array IGNORED_FILES = [
+        '/.pnpm-store',
+        'docker-compose.override.yaml',
+        'docker-compose.override.aurora.bak',
+        '.env.aurora.bak',
+        Constants::AURORA_STORAGE_PATH,
     ];
 }

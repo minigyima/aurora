@@ -17,7 +17,8 @@
         "laravel/sanctum": "^3.3",
         "symfony/yaml": "^7.0",
         "laravel/horizon": "^5.21",
-        "ext-pcntl": "*"
+        "ext-pcntl": "*",
+        "czproject/git-php": "^4.2"
     },
     "license": "MIT",
     "autoload": {

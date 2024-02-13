@@ -7,12 +7,14 @@ use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
 use Minigyima\Aurora\Commands\AuroraShellCommand;
 use Minigyima\Aurora\Commands\BuildAuroraCommand;
+use Minigyima\Aurora\Commands\BuildProductionCommand;
 use Minigyima\Aurora\Commands\ConfigureDatabase;
 use Minigyima\Aurora\Commands\ConfigureSoketiCommand;
 use Minigyima\Aurora\Commands\MercuryBoot;
 use Minigyima\Aurora\Commands\MercuryBootHorizon;
 use Minigyima\Aurora\Commands\StartAuroraCommand;
 use Minigyima\Aurora\Commands\StopAuroraCommand;
+use Minigyima\Aurora\Commands\UpdateAuroraCommand;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Config\ConfigManager\Providers\ConfigServiceProvider;
 use Minigyima\Aurora\Config\Constants;
@@ -93,6 +95,8 @@ class AuroraServiceProvider extends ServiceProvider
             MercuryBootHorizon::class,
             MercuryBoot::class,
             ConfigureSoketiCommand::class,
+            BuildProductionCommand::class,
+            UpdateAuroraCommand::class,
         ]);
     }
 

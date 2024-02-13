@@ -7,7 +7,7 @@ use Minigyima\Aurora\Storage\AuroraMarker;
 
 /**
  * VerifiesEnvironment - Trait for verifying the environment that Aurora is running in
- * @package Minigyima\Aurora\Traits
+ * @package Minigyima\Aurora\Concernns
  */
 trait VerifiesEnvironment
 {
@@ -34,6 +34,17 @@ trait VerifiesEnvironment
             ) &&
             AuroraMarker::PATCHED
         );
+    }
+
+    /**
+     * Check if git is installed
+     *
+     * @return bool
+     */
+    private static function testForGit(): bool
+    {
+        $test_method = (false === stripos(PHP_OS, 'winnt')) ? 'which' : 'where';
+        return ! (null === shell_exec("$test_method git"));
     }
 
 
