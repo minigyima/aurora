@@ -69,7 +69,7 @@ COPY storage/aurora/temp/assets/crontabs /var/spool/cron/crontabs/
 COPY storage/aurora/temp/assets/entrypoint.sh /usr/local/bin/mercury_entrypoint.sh
 
 COPY storage/aurora/temp/source /srv/www/
-RUN rm Dockerfile Dockerfile.aurora.bak
+RUN rm -f Dockerfile Dockerfile.aurora.bak
 RUN chown -R aurora:aurora /srv/www
 
 RUN composer install --no-dev --no-interaction --no-suggest --optimize-autoloader --classmap-authoritative
