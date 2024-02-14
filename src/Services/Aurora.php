@@ -16,6 +16,7 @@ use Minigyima\Aurora\Contracts\AbstractSingleton;
 use Minigyima\Aurora\Errors\BuildCancelledException;
 use Minigyima\Aurora\Errors\CommandNotApplicableException;
 use Minigyima\Aurora\Errors\DockerBuildFailedException;
+use Minigyima\Aurora\Errors\DockerExportException;
 use Minigyima\Aurora\Errors\NoDockerException;
 use Minigyima\Aurora\Errors\NoGitException;
 use Minigyima\Aurora\Support\ConsoleLogger;
@@ -135,15 +136,24 @@ class Aurora extends AbstractSingleton
     }
 
     /**
-     * @throws NoGitException
+     * Build the production environment
+     * @param bool $export - Whether or not to export the image
+     * @param string $export_dir - The directory to export the image to
+     * @param bool $yes - Whether or not to bypass the confirmation prompts
      * @throws BuildCancelledException
+     * @throws DockerBuildFailedException
+     * @throws NoGitException
+     * @throws DockerExportException
      */
-    public function buildProduction(): void
-    {
-        $this->preFlightChecks();
+    public function buildProduction(
+        bool   $export = false,
+        string $export_dir = Constants::AURORA_BUILD_PATH,
+        bool   $yes = false
+    ): void {
+        $this->preFlightChecks($yes);
         ConsoleLogger::log_info('Building production...');
         $this->prepareTempDirectory();
-        $this->createProdDockerfile();
+        $this->createProdDockerfile($yes);
 
         $this->docker_tag = str_replace([' ', '-'], ['_', '_'], StrClean::clean(strtolower(config('app.name')))) .
                             ':' .
@@ -174,15 +184,39 @@ class Aurora extends AbstractSingleton
 
         ConsoleLogger::log_success('Image built successfully. Tag: ' . $this->docker_tag);
 
-        if (confirm('Would you like to export the image?')) {
+        if ((! ($yes && ! $export)) && ($export || confirm('Would you like to export the image?'))) {
             ConsoleLogger::log_info('Exporting image...');
 
             if (! file_exists(Constants::AURORA_BUILD_PATH)) {
-                ConsoleLogger::log_trace('Creating build directory...');
                 mkdir(Constants::AURORA_BUILD_PATH, 0777, true);
             }
 
-            $path = Constants::AURORA_BUILD_PATH . '/' . $this->docker_tag . '.docker';
+            $export_dir = rtrim(realpath($export_dir), DIRECTORY_SEPARATOR);
+
+            if (! file_exists($export_dir)) {
+                ConsoleLogger::log_error('The export directory does not exist. Please create it and try again.');
+                throw new DockerExportException(
+                    'The export directory does not exist. Please create it and try again.'
+                );
+            }
+
+            if (! is_dir($export_dir)) {
+                ConsoleLogger::log_error('The export directory is not a directory. Please create it and try again.');
+                throw new DockerExportException(
+                    'The export directory is not a directory. Please create it and try again.'
+                );
+            }
+
+            if (! is_writable($export_dir)) {
+                ConsoleLogger::log_error(
+                    'The export directory is not writable. Please check the permissions and try again.'
+                );
+                throw new DockerExportException(
+                    'The export directory is not writable. Please check the permissions and try again.'
+                );
+            }
+
+            $path = $export_dir . '/' . $this->docker_tag . '.docker';
             $command = self::generateDockerSaveCommand($this->docker_tag, $path);
             ConsoleLogger::log_trace('Creating tarball @ ' . $path);
 

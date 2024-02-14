@@ -19,10 +19,13 @@ trait RunsPreFlightChecks
 
     /**
      * Run checks before building the production environment
+     * @param bool $yes
+     * @return void
      * @throws NoGitException
      * @throws BuildCancelledException
+     * @internal
      */
-    private function preFlightChecks(): void
+    private function preFlightChecks(bool $yes = false): void
     {
         if (! self::testForGit()) {
             ConsoleLogger::log_error('Git is not installed on your system', 'PreFlightChecks');
@@ -38,7 +41,7 @@ trait RunsPreFlightChecks
 
         if (! GitHelper::isRepo(base_path())) {
             ConsoleLogger::log_warning('This project is not a git repository', 'PreFlightChecks');
-            $choice = confirm('Would you like to initialize a git repository?');
+            $choice = $yes || confirm('Would you like to initialize a git repository?');
             if ($choice) {
                 ConsoleLogger::log_info('Initializing git repository...', 'PreFlightChecks');
                 GitHelper::init(base_path());
@@ -51,7 +54,7 @@ trait RunsPreFlightChecks
 
         if (GitHelper::isDirty(base_path())) {
             ConsoleLogger::log_warning('There are uncommitted changes in the repository', 'PreFlightChecks');
-            $choice = confirm('Would you like to continue?');
+            $choice = $yes || confirm('Would you like to continue?');
             if (! $choice) {
                 ConsoleLogger::log_error(
                     'Build cancelled. Please commit any uncommited changes.',

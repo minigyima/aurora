@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Minigyima\Aurora\Concerns\InteractsWithDockerManifest;
 use Minigyima\Aurora\Concerns\TestsForDocker;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
+use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Errors\AuroraException;
 use Minigyima\Aurora\Services\Aurora;
 use Minigyima\Aurora\Support\ConsoleLogger;
@@ -25,7 +26,7 @@ class BuildProductionCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'aurora:build-production';
+    protected $signature = 'aurora:build-production {--yes : Skip confirmation prompt} {--export : Export the production build} {--directory= : The directory to export the production build to}';
 
     /**
      * The console command description.
@@ -39,6 +40,9 @@ class BuildProductionCommand extends Command
      */
     public function handle(): int
     {
+        $yes = $this->option('yes');
+        $export = $this->option('export');
+        $directory = $this->option('directory');
 
         $app_name = config('app.name');
         ConsoleLogger::log_info('Building production for ' . $app_name, 'BuildProductionCommand');
@@ -51,7 +55,11 @@ class BuildProductionCommand extends Command
         ConsoleLogger::log_info('Checking manifest for changes...', 'BuildProductionCommand');
         if (! $this->compareWithNew()) {
             ConsoleLogger::log_warning('Changes detected in the manifest. Rebuilding...', 'BuildProductionCommand');
-            $this->call('aurora:build');
+            $result = $this->call('aurora:build');
+            if ($result !== self::SUCCESS) {
+                ConsoleLogger::log_error('Build failed. Please check the logs and try again', 'BuildProductionCommand');
+                return self::FAILURE;
+            }
             $this->writeManifest();
         }
 
@@ -72,7 +80,7 @@ class BuildProductionCommand extends Command
             ]
         ]);
 
-        if (! confirm('Is this correct?')) {
+        if (! ($yes || confirm('Is this correct?'))) {
             ConsoleLogger::log_error(
                 "Please update the configuration and try again. You may need to run 'php artisan config:clear'",
                 'BuildProductionCommand'
@@ -83,7 +91,11 @@ class BuildProductionCommand extends Command
         $aurora = Aurora::use();
 
         try {
-            $aurora->buildProduction();
+            $aurora->buildProduction(
+                export: $export,
+                export_dir: $directory ?? Constants::AURORA_BUILD_PATH,
+                yes: $yes
+            );
         } catch (AuroraException $e) {
             return self::FAILURE;
         }

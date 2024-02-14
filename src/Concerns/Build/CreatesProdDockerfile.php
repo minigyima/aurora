@@ -15,11 +15,12 @@ trait CreatesProdDockerfile
 {
     /**
      * Create the production Dockerfile
+     * @param bool $yes
      * @return void
      * @throws BuildCancelledException
      * @internal
      */
-    private function createProdDockerfile(): void
+    private function createProdDockerfile(bool $yes = false): void
     {
         $this->ensureDockerFileExists();
 
@@ -41,7 +42,7 @@ trait CreatesProdDockerfile
                     'Your Dockerfile is newer than the one shipped by Aurora.',
                     'CreateProdDockerfile'
                 );
-                $this->overwriteDockerfile();
+                $this->overwriteDockerfile($yes);
 
 
             } else {
@@ -82,13 +83,14 @@ trait CreatesProdDockerfile
 
     /**
      * Prompt the user to overwrite the Dockerfile
+     * @param bool $yes
      * @return void
      * @throws BuildCancelledException
      * @internal
      */
-    private function overwriteDockerfile(): void
+    private function overwriteDockerfile(bool $yes = false): void
     {
-        $choice = confirm('Would you like to overwrite your Dockerfile?');
+        $choice = $yes || confirm('Would you like to overwrite your Dockerfile?');
 
         if ($choice) {
             ConsoleLogger::log_info('Overwriting Dockerfile...', 'CreateProdDockerfile');
@@ -104,7 +106,7 @@ trait CreatesProdDockerfile
                 'CreateProdDockerfile'
             );
 
-            if (! confirm('Shall we continue?')) {
+            if (! ($yes || confirm('Shall we continue?'))) {
                 ConsoleLogger::log_error('Build cancelled', 'CreateProdDockerfile');
                 throw new BuildCancelledException('Build cancelled');
             }
