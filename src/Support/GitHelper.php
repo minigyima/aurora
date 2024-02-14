@@ -2,6 +2,8 @@
 
 namespace Minigyima\Aurora\Support;
 
+use Symfony\Component\Process\Process;
+
 /**
  * Helper class for git operations
  * @package Minigyima\Aurora\Support
@@ -16,7 +18,8 @@ class GitHelper
      */
     public static function isRepo(string $repo_path): bool
     {
-        return '' == shell_exec("git -C $repo_path rev-parse");
+        $process = Process::fromShellCommandline("git -C $repo_path rev-parse");
+        return 0 === $process->run();
     }
 
     /**

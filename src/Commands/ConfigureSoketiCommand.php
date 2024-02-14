@@ -150,6 +150,10 @@ class ConfigureSoketiCommand extends Command
                 ]
             ];
 
+            if (! file_exists(pathinfo(Constants::SOKETI_CONFIG_FILE_PATH, PATHINFO_DIRNAME))) {
+                mkdir(pathinfo(Constants::SOKETI_CONFIG_FILE_PATH, PATHINFO_DIRNAME), 0755, true);
+            }
+
             $this->info('Writing settings to soketi/config.json...');
             $soketi_config_json = json_encode($soketi_config, JSON_PRETTY_PRINT);
             file_put_contents(Constants::SOKETI_CONFIG_FILE_PATH, $soketi_config_json);

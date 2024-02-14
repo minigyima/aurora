@@ -5,6 +5,7 @@ namespace Minigyima\Aurora\Concerns\Build;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Errors\BuildCancelledException;
 use Minigyima\Aurora\Errors\NoGitException;
+use Minigyima\Aurora\Handlers\PostInstallHandler;
 use Minigyima\Aurora\Support\ConsoleLogger;
 use Minigyima\Aurora\Support\GitHelper;
 use function Laravel\Prompts\confirm;
@@ -45,6 +46,7 @@ trait RunsPreFlightChecks
             if ($choice) {
                 ConsoleLogger::log_info('Initializing git repository...', 'PreFlightChecks');
                 GitHelper::init(base_path());
+                PostInstallHandler::initGitIgnore();
                 ConsoleLogger::log_success('Git repository initialized', 'PreFlightChecks');
             } else {
                 ConsoleLogger::log_error('Git repository not initialized', 'PreFlightChecks');
