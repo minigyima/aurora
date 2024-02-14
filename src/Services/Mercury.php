@@ -72,18 +72,21 @@ class Mercury extends AbstractSingleton
 
         $this->auroraThread = $this->createAuroraThread();
 
-        ConsoleLogger::log_info('Starting File Watcher...', 'Aurora');
-        $watcher = Watch::paths([base_path('.env')]);
+        if (! self::runningInProduction()) {
+            ConsoleLogger::log_info('Starting File Watcher...', 'Aurora');
+            $watcher = Watch::paths([base_path('.env')]);
 
-        $watcher->onFileUpdated(function (string $file) use ($watcher) {
-            ConsoleLogger::log_info("File updated: $file --> Restarting Aurora...", 'Mercury');
-            Artisan::call('config:cache');
-            $this->killAurora();
-            $watcher->shouldContinue(fn() => false);
-            $this->auroraThread->stop();
-        });
+            $watcher->onFileUpdated(function (string $file) use ($watcher) {
+                ConsoleLogger::log_info("File updated: $file --> Restarting Aurora...", 'Mercury');
+                Artisan::call('config:cache');
+                $this->killAurora();
+                $watcher->shouldContinue(fn() => false);
+                $this->auroraThread->stop();
+            });
 
-        $watcher->start();
+            $watcher->start();
+        }
+
         $this->auroraThread->wait();
 
         return 1;
@@ -98,8 +101,11 @@ class Mercury extends AbstractSingleton
     {
         ConsoleLogger::log_info('Killing Aurora...', 'Mercury');
         $process = Process::fromShellCommandline('bash ' . Constants::KILL_SCRIPT_PATH);
-        $process->setTty(true);
-        $process->start();
+        $process->setTty(posix_isatty(STDOUT));
+        $process->start(
+            posix_isatty(STDOUT) ? null :
+                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+        );
         $process->wait();
     }
 
@@ -112,8 +118,11 @@ class Mercury extends AbstractSingleton
     private function createAuroraThread(): Process
     {
         $thread = Process::fromShellCommandline($this->auroraThreadCommand());
-        $thread->setTty(true);
-        $thread->start();
+        $thread->setTty(posix_isatty(STDOUT));
+        $thread->start(
+            posix_isatty(STDOUT) ? null :
+                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+        );
         $thread->setTimeout(null);
 
         return $thread;
@@ -154,32 +163,40 @@ class Mercury extends AbstractSingleton
         $this->requireActive();
         $this->checkHorizonRedis();
         $thread = new Process(['php', 'artisan', 'horizon']);
+        $thread->setTimeout(null);
 
-        $thread->setTty(true);
+        $thread->setTty(posix_isatty(STDOUT));
 
-        ConsoleLogger::log_info('Starting File Watcher...', 'Mercury');
-        $watcher = Watch::paths([
-            base_path('app/Jobs'),
-            base_path('app/Events'),
-            base_path('app/Mail'),
-            base_path('.env'),
-        ]);
+        $watcher = null;
+        if (! self::runningInProduction()) {
+            ConsoleLogger::log_info('Starting File Watcher...', 'Mercury');
+            $watcher = Watch::paths([
+                base_path('app/Jobs'),
+                base_path('app/Events'),
+                base_path('app/Mail'),
+                base_path('.env'),
+            ]);
 
-        $watcher->onFileUpdated(function (string $file) use ($thread) {
-            ConsoleLogger::log_info("File updated: $file --> Restarting Horizon...", 'Mercury');
-            $thread->stop();
-            $thread->start();
-        });
+            $watcher->onFileUpdated(function (string $file) use ($thread) {
+                ConsoleLogger::log_info("File updated: $file --> Restarting Horizon...", 'Mercury');
+                $thread->stop();
+                $thread->start();
+            });
 
-        $watcher->onFileDeleted(function (string $file) use ($thread) {
-            ConsoleLogger::log_info("File deleted: $file --> Restarting Horizon...", 'Mercury');
-            $thread->stop();
-            $thread->start();
-        });
+            $watcher->onFileDeleted(function (string $file) use ($thread) {
+                ConsoleLogger::log_info("File deleted: $file --> Restarting Horizon...", 'Mercury');
+                $thread->stop();
+                $thread->start();
+            });
+        }
 
-        $thread->start();
+        $thread->start(
+            posix_isatty(STDOUT) ? null :
+                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+        );
 
-        $watcher->start();
+
+        $watcher?->start();
         $thread->wait();
     }
 

@@ -6,12 +6,10 @@ use Illuminate\Console\Command;
 use Minigyima\Aurora\Concerns\InteractsWithDockerManifest;
 use Minigyima\Aurora\Concerns\TestsForDocker;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
-use Minigyima\Aurora\Config\Constants;
+use Minigyima\Aurora\Errors\AuroraException;
+use Minigyima\Aurora\Services\Aurora;
 use Minigyima\Aurora\Support\ConsoleLogger;
-use Minigyima\Aurora\Support\GitHelper;
 use function Laravel\Prompts\confirm;
-use function Minigyima\Aurora\Support\rrmdir;
-use function Minigyima\Aurora\Support\rsync_repo_ignore;
 
 /**
  * BuildProductionCommand - Command for building the Aurora framework
@@ -34,13 +32,14 @@ class BuildProductionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Start the Aurora framework';
+    protected $description = 'Build the Aurora framework for production';
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
+
         $app_name = config('app.name');
         ConsoleLogger::log_info('Building production for ' . $app_name, 'BuildProductionCommand');
         ConsoleLogger::log_trace('Running pre-build checks...', 'BuildProductionCommand');
@@ -49,52 +48,47 @@ class BuildProductionCommand extends Command
             return self::FAILURE;
         }
 
-        if (! self::testForGit()) {
-            ConsoleLogger::log_error('Git is not installed on your system', 'BuildProductionCommand');
+        ConsoleLogger::log_info('Checking manifest for changes...', 'BuildProductionCommand');
+        if (! $this->compareWithNew()) {
+            ConsoleLogger::log_warning('Changes detected in the manifest. Rebuilding...', 'BuildProductionCommand');
+            $this->call('aurora:build');
+            $this->writeManifest();
+        }
+
+        ConsoleLogger::log_info('Enabled features: ', 'BuildProductionCommand');
+        $this->table([
+            'Sockets',
+            'Scheduler',
+            'Queue',
+            'Database',
+            'Redis'
+        ], [
+            [
+                config('aurora.sockets_enabled') ? 'Enabled' : 'Disabled',
+                config('aurora.scheduler_enabled') ? 'Enabled' : 'Disabled',
+                config('aurora.queue_enabled') ? 'Enabled' : 'Disabled',
+                config('aurora.database_enabled') ? 'Enabled' : 'Disabled',
+                config('aurora.redis_enabled') ? 'Enabled' : 'Disabled'
+            ]
+        ]);
+
+        if (! confirm('Is this correct?')) {
+            ConsoleLogger::log_error(
+                "Please update the configuration and try again. You may need to run 'php artisan config:clear'",
+                'BuildProductionCommand'
+            );
             return self::FAILURE;
         }
 
-        ConsoleLogger::log_success('Pre-build checks passed!', 'BuildProductionCommand');
+        $aurora = Aurora::use();
 
-        $base_path = base_path();
-
-        if (! GitHelper::isRepo(base_path())) {
-            ConsoleLogger::log_warning('This project is not a git repository', 'BuildProductionCommand');
-            $choice = confirm('Would you like to initialize a git repository?');
-            if ($choice) {
-                ConsoleLogger::log_info('Initializing git repository...', 'BuildProductionCommand');
-                GitHelper::init(base_path());
-                ConsoleLogger::log_success('Git repository initialized', 'BuildProductionCommand');
-            } else {
-                ConsoleLogger::log_error('Git repository not initialized', 'BuildProductionCommand');
-                return self::FAILURE;
-            }
+        try {
+            $aurora->buildProduction();
+        } catch (AuroraException $e) {
+            return self::FAILURE;
         }
 
-        if (GitHelper::isDirty(base_path())) {
-            ConsoleLogger::log_warning('There are uncommitted changes in the repository', 'BuildProductionCommand');
-            $choice = confirm('Would you like to continue?');
-            if (! $choice) {
-                ConsoleLogger::log_error(
-                    'Build cancelled. Please commit any uncommited changes.',
-                    'BuildProductionCommand'
-                );
-                return self::FAILURE;
-            }
-        }
-
-        ConsoleLogger::log_info('Building production...', 'BuildProductionCommand');
-        ConsoleLogger::log_info('Making a copy of your source code...', 'BuildProductionCommand');
-        $temp_path = base_path(Constants::AURORA_TEMP_PATH);
-        if (file_exists($temp_path)) {
-            ConsoleLogger::log_warning('Cleaning up temporary directory...', 'BuildProductionCommand');
-            rrmdir($temp_path);
-        }
-
-        ConsoleLogger::log_trace('Copying source code to temporary directory...', 'BuildProductionCommand');
-        mkdir($temp_path);
-        rsync_repo_ignore($base_path, $temp_path);
-        ConsoleLogger::log_success('Finished copying source code to temporary directory', 'BuildProductionCommand');
+        $this->info('Done. Have a *GREAT* day!');
 
         return self::SUCCESS;
     }

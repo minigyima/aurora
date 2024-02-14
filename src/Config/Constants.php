@@ -10,6 +10,11 @@ class Constants
     public const AURORA_STORAGE_PATH = 'storage/aurora';
 
     /**
+     * Aurora build path
+     */
+    public const AURORA_BUILD_PATH = self::AURORA_STORAGE_PATH . '/build';
+
+    /**
      * Temp path for building the production docker image
      */
     public const AURORA_TEMP_PATH = self::AURORA_STORAGE_PATH . '/temp';
@@ -51,6 +56,11 @@ class Constants
      * Path to the mercury container file
      */
     public const MERCURY_MARKER = '/mercury.container';
+
+    /**
+     * Path to the production marker file
+     */
+    public const PRODUCTION_MARKER = '/is_prod';
 
     /**
      * Prefix mercury uses when locking the first run

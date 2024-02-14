@@ -2,16 +2,27 @@
 
 namespace Minigyima\Aurora\Services;
 
-use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
+use Minigyima\Aurora\Concerns\Build\CreatesProdDockerfile;
+use Minigyima\Aurora\Concerns\Build\GeneratesProductionEnvFile;
+use Minigyima\Aurora\Concerns\Build\PreparesTempDirectory;
+use Minigyima\Aurora\Concerns\Build\RunsPreFlightChecks;
+use Minigyima\Aurora\Concerns\Docker\InteractsWithComposeFiles;
+use Minigyima\Aurora\Concerns\Docker\InteractsWithDockerCommands;
+use Minigyima\Aurora\Concerns\EnsuresAuroraStorageExists;
 use Minigyima\Aurora\Concerns\TestsForDocker;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Contracts\AbstractSingleton;
+use Minigyima\Aurora\Errors\BuildCancelledException;
 use Minigyima\Aurora\Errors\CommandNotApplicableException;
+use Minigyima\Aurora\Errors\DockerBuildFailedException;
 use Minigyima\Aurora\Errors\NoDockerException;
+use Minigyima\Aurora\Errors\NoGitException;
 use Minigyima\Aurora\Support\ConsoleLogger;
+use Minigyima\Aurora\Support\StrClean;
 use Override;
 use Symfony\Component\Process\Process;
+use function Laravel\Prompts\confirm;
 
 /**
  * Aurora - The Aurora Runtime, used to manage the Aurora Docker environment
@@ -20,13 +31,27 @@ use Symfony\Component\Process\Process;
  */
 class Aurora extends AbstractSingleton
 {
-    use VerifiesEnvironment, TestsForDocker, InteractsWithComposeFiles;
+    use VerifiesEnvironment,
+        TestsForDocker,
+        InteractsWithComposeFiles,
+        GeneratesProductionEnvFile,
+        RunsPreFlightChecks,
+        EnsuresAuroraStorageExists,
+        PreparesTempDirectory,
+        CreatesProdDockerfile,
+        InteractsWithDockerCommands;
 
     /**
      * @var bool
      * Whether or not Aurora is running in Mercury
      */
     private bool $isMercury = false;
+
+    /**
+     * @var string
+     * The Docker tag for the production build
+     */
+    private string $docker_tag;
 
     /**
      * Aurora constructor.
@@ -43,24 +68,6 @@ class Aurora extends AbstractSingleton
         $this->ensureStorageExists();
     }
 
-    /**
-     * Ensure the storage directory exists
-     * @return void
-     */
-    private function ensureStorageExists(): void
-    {
-        if (! file_exists(base_path(Constants::AURORA_DOCKER_STORAGE_PATH))) {
-            mkdir(base_path(Constants::AURORA_DOCKER_STORAGE_PATH), 0777, true);
-        }
-
-        if (! file_exists(base_path(Constants::AURORA_DOCKER_STORAGE_PATH)) . '/.gitignore') {
-            file_put_contents(base_path(Constants::AURORA_DOCKER_STORAGE_PATH) . '/.gitignore', '*');
-        }
-
-        if (! file_exists(base_path(Constants::AURORA_DOCKER_STORAGE_PATH) . '/logs/nginx')) {
-            mkdir(base_path(Constants::AURORA_DOCKER_STORAGE_PATH) . '/logs/nginx', 0777, true);
-        }
-    }
 
     /**
      * Returns an instance of the Aurora singleton
@@ -90,60 +97,6 @@ class Aurora extends AbstractSingleton
         $command = $this->generateComposePrompt('up');
 
         return Process::fromShellCommandline($command)->setTimeout(null);
-    }
-
-    /**
-     * Generate the compose prompt for use with Docker Compose
-     * @param string $command
-     * @return string
-     */
-    private function generateComposePrompt(string $command): string
-    {
-        ConsoleLogger::log_info('Generating compose prompt for command: ' . $command);
-        $files = [];
-        $name = strtolower(config('app.name'));
-
-        $files[] = self::getCurrentComposeFile();
-
-        if (file_exists(base_path('docker-compose.override.yaml'))) {
-            $files[] = base_path('docker-compose.override.yaml');
-        }
-
-        if (file_exists(base_path('docker-compose.override.yml'))) {
-            $files[] = base_path('docker-compose.override.yml');
-        }
-
-        $profiles = [];
-        if (config('aurora.sockets_enabled')) {
-            $profiles[] = 'sockets';
-        }
-
-        if (config('aurora.redis_enabled')) {
-            $profiles[] = 'redis';
-        }
-
-        if (config('aurora.database_enabled')) {
-            $profiles[] = 'database';
-        }
-
-        if (config('aurora.queue_enabled')) {
-            $profiles[] = 'queue';
-        }
-
-        if (config('aurora.scheduler_enabled')) {
-            $profiles[] = 'scheduler';
-        }
-
-        $profile_str = '--profile ' . implode(' --profile ', $profiles);
-        $file_str = '-f ' . implode(' -f ', $files);
-
-        ConsoleLogger::log_trace('Using compose files: ' . implode(', ', $files));
-        ConsoleLogger::log_trace('Using profiles: ' . implode(', ', $profiles));
-
-        $command = "docker compose $file_str $profile_str -p $name $command";
-        ConsoleLogger::log_trace('Using compose command: ' . $command);
-
-        return trim($command);
     }
 
     /**
@@ -180,6 +133,71 @@ class Aurora extends AbstractSingleton
 
         return Process::fromShellCommandline($command)->setTimeout(null);
     }
+
+    /**
+     * @throws NoGitException
+     * @throws BuildCancelledException
+     */
+    public function buildProduction(): void
+    {
+        $this->preFlightChecks();
+        ConsoleLogger::log_info('Building production...');
+        $this->prepareTempDirectory();
+        $this->createProdDockerfile();
+
+        $this->docker_tag = str_replace([' ', '-'], ['_', '_'], StrClean::clean(strtolower(config('app.name')))) .
+                            ':' .
+                            date('Y-m-d_H-i-s');
+
+        ConsoleLogger::log_info('Building Docker image...');
+        $command = self::generateDockerBuildCommand($this->docker_tag, '.');
+
+        $process = Process::fromShellCommandline($command);
+        $process->setTimeout(0);
+
+        $process->run(function ($type, $buffer) {
+            ConsoleLogger::log_info($buffer, 'docker');
+        });
+
+        $process->wait();
+
+        if ($process->isSuccessful() === false) {
+            ConsoleLogger::log_error(
+                'The Docker build process ended with a non-zero exit code. Check the logs for more information.'
+            );
+            throw new DockerBuildFailedException(
+                'The Docker build process ended with a non-zero exit code. Check the logs for more information.'
+            );
+
+        }
+        $this->rmTemp();
+
+        ConsoleLogger::log_success('Image built successfully. Tag: ' . $this->docker_tag);
+
+        if (confirm('Would you like to export the image?')) {
+            ConsoleLogger::log_info('Exporting image...');
+
+            if (! file_exists(Constants::AURORA_BUILD_PATH)) {
+                ConsoleLogger::log_trace('Creating build directory...');
+                mkdir(Constants::AURORA_BUILD_PATH, 0777, true);
+            }
+
+            $path = Constants::AURORA_BUILD_PATH . '/' . $this->docker_tag . '.docker';
+            $command = self::generateDockerSaveCommand($this->docker_tag, $path);
+            ConsoleLogger::log_trace('Creating tarball @ ' . $path);
+
+            $process = Process::fromShellCommandline($command);
+            $process->setTimeout(0);
+            $process->run(function ($type, $buffer) {
+                ConsoleLogger::log_info($buffer, 'docker');
+            });
+
+            $process->wait();
+
+            ConsoleLogger::log_success('Image exported successfully. Path: ' . base_path($path));
+        }
+    }
+
 
     /**
      * Opens a shell inside the Mercury container

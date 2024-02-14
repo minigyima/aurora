@@ -10,3 +10,4 @@ log_trace "Booting your application..."
 firstboot
 
 boot
+root

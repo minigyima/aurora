@@ -111,7 +111,7 @@ services:
         entrypoint: [ "sh", "-c", "touch /soketi/config.json && node /app/bin/server.js start --config /soketi/config.json" ]
 
     postgres:
-        image: postgres:alpine
+        image: postgres:16-alpine
         restart: on-failure
         hostname: aurora-postgres
         ports:

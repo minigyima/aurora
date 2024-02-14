@@ -16,7 +16,7 @@ return [
     | Frontend rootDir
     |--------------------------------------------------------------------------
     |
-    | This option controls the root directory of the frontend compiler
+    | This option controls the aurora directory of the frontend compiler
     |
     */
     'frontend_root_dir' => base_path('frontend'),

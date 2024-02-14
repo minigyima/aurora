@@ -4,7 +4,7 @@ namespace Minigyima\Aurora\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
+use Minigyima\Aurora\Concerns\Docker\InteractsWithComposeFiles;
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Models\DockerCompose;
 use Minigyima\Aurora\Models\EnvironmentFile;

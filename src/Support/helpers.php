@@ -95,21 +95,48 @@ function aurora_response(
     return new AuroraResponse($data, $statusCode, $headers, $encodingOptions, $json, $status, $message);
 }
 
-function rsync_repo_ignore(string $source, string $destination)
+/**
+ * Rsync a repository while ignoring files that are ignored by git
+ * @param string $source
+ * @param string $destination
+ * @param bool $ignoreGitDir
+ * @return int
+ */
+function rsync_repo_ignore(string $source, string $destination, bool $ignoreGitDir = true): int
 {
     $excluded = GitHelper::getIgnoredFiles($source);
-    $excluded = array_map(fn($item) => "'" . rtrim($item, '/') . "'", $excluded);
+    if ($ignoreGitDir) {
+        $excluded[] = '.git';
+    }
+
+    return rsync($source, $destination, $excluded);
+}
+
+/**
+ * Run the rsync command
+ * @param string $source
+ * @param string $destination
+ * @param array $excluded_files
+ * @return int
+ */
+function rsync(string $source, string $destination, array $excluded_files = []): int
+{
+    $excluded = array_map(fn($item) => "'" . rtrim($item, DIRECTORY_SEPARATOR) . "'", $excluded_files);
 
     $excluded = implode(',', $excluded);
     $excluded = "--exclude={{$excluded}}";
+
+    $source = rtrim($source, DIRECTORY_SEPARATOR);
 
     $command = "rsync -avz --progress $excluded $source/ $destination";
 
     $process = Process::fromShellCommandline($command);
     $process->setPty(true);
     $process->start(function ($type, $buffer) {
-        ConsoleLogger::log_trace($buffer, 'BuildProductionCommand --> rsync_repo_ignore');
+        ConsoleLogger::log_trace($buffer, 'rsync');
     });
 
     return $process->wait();
 }
+
+

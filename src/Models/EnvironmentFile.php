@@ -145,7 +145,7 @@ class EnvironmentFile
             }
         }
 
-        file_put_contents($this->envPath ?? base_path('.env'), $env);
+        file_put_contents($this->envPath ?? base_path('.env'), $env . PHP_EOL);
     }
 
 }

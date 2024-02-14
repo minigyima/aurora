@@ -1,11 +1,27 @@
-FROM php:8.3.2-fpm-alpine3.19
+FROM node:18-alpine3.19 as node
 
+RUN rm /usr/local/bin/docker-entrypoint.sh
+
+RUN apk add --no-cache rsync && \
+    rsync -avz /usr/local/* /node_usr_local && \
+    rsync -avz /opt/* /node_opt && \
+    apk del --no-network rsync
+
+FROM php:8.3.2-fpm-alpine3.19
 WORKDIR /srv/www
-#aaa
+
+RUN echo 'Installing NodeJS v18...'
+COPY --from=node /node_usr_local /node_usr_local
+COPY --from=node /node_opt /node_opt
+RUN apk add --no-cache rsync && \
+    rsync -avz /node_usr_local/* /usr/local/ && \
+    rsync -avz /node_opt/* /opt/ && \
+    apk del --no-network rsync
+
 RUN echo 'Installing packages...'
 RUN apk update && \
-    apk add npm \
-    nodejs \
+    apk add libstdc++ \
+    gcompat \
     bzip2-dev \
     coreutils \
     freetype-dev \
@@ -41,7 +57,8 @@ RUN . /envfile; docker-php-ext-install -j$PROC_COUNT bcmath \
     shmop \
     sysvmsg \
     sysvsem \
-    sysvshm
+    sysvshm \
+    posix
 
 
 RUN apk --no-cache add pcre-dev imagemagick-dev linux-headers imagemagick-dev ${PHPIZE_DEPS}
@@ -57,7 +74,9 @@ RUN git clone https://github.com/Imagick/imagick && \
     cd imagick && \
     phpize && ./configure && \
     make -j$(nproc) && \
-    make -j$(nproc) install
+    make -j$(nproc) install && \
+    cd .. && \
+    rm -rf imagick
 
 #RUN docker-php-ext-enable redis gd dom openswoole
 RUN docker-php-ext-enable redis imagick gd dom openswoole

@@ -12,6 +12,7 @@ use Minigyima\Aurora\Commands\ConfigureDatabase;
 use Minigyima\Aurora\Commands\ConfigureSoketiCommand;
 use Minigyima\Aurora\Commands\MercuryBoot;
 use Minigyima\Aurora\Commands\MercuryBootHorizon;
+use Minigyima\Aurora\Commands\PrepareProductionCommand;
 use Minigyima\Aurora\Commands\StartAuroraCommand;
 use Minigyima\Aurora\Commands\StopAuroraCommand;
 use Minigyima\Aurora\Commands\UpdateAuroraCommand;
@@ -97,6 +98,7 @@ class AuroraServiceProvider extends ServiceProvider
             ConfigureSoketiCommand::class,
             BuildProductionCommand::class,
             UpdateAuroraCommand::class,
+            PrepareProductionCommand::class,
         ]);
     }
 
@@ -113,7 +115,7 @@ class AuroraServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/aurora.php', 'aurora');
+        $this->mergeConfigFrom(__DIR__ . '/../Config/aurora.php', 'aurora');
         if ($this->app->runningInConsole() && ! CheckForSwoole::check()) {
             $this->app->singleton(Aurora::class, fn() => new Aurora());
             $this->app->singleton(Mercury::class, fn() => new Mercury());

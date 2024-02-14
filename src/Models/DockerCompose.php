@@ -3,7 +3,7 @@
 namespace Minigyima\Aurora\Models;
 
 use ArrayAccess;
-use Minigyima\Aurora\Concerns\InteractsWithComposeFiles;
+use Minigyima\Aurora\Concerns\Docker\InteractsWithComposeFiles;
 use Minigyima\Aurora\Errors\InvalidDockerComposeException;
 use Override;
 use Symfony\Component\Yaml\Yaml;

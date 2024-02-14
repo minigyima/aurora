@@ -22,6 +22,16 @@ trait VerifiesEnvironment
     }
 
     /**
+     * Check if we're running in Production
+     *
+     * @return bool
+     */
+    private static function runningInProduction(): bool
+    {
+        return file_exists(Constants::PRODUCTION_MARKER);
+    }
+
+    /**
      * Check if this is the first run
      *
      * @return bool

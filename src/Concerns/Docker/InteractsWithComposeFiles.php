@@ -1,6 +1,6 @@
 <?php
 
-namespace Minigyima\Aurora\Concerns;
+namespace Minigyima\Aurora\Concerns\Docker;
 
 /**
  * InteractsWithComposeFiles - Trait for interacting with docker-compose files
@@ -20,7 +20,7 @@ trait InteractsWithComposeFiles
             if (file_exists(base_path('docker-compose.yaml'))) {
                 $path = realpath(base_path('docker-compose.yaml'));
             } else {
-                $path = realpath(__DIR__ . '/../Stubs/docker-compose.yml');
+                $path = realpath(__DIR__ . '/../../Stubs/docker-compose.yml');
             }
         }
 

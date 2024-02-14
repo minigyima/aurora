@@ -5,6 +5,7 @@ namespace Minigyima\Aurora\Support;
 /**
  * Helper class for git operations
  * @package Minigyima\Aurora\Support
+ * @internal
  */
 class GitHelper
 {
@@ -35,9 +36,9 @@ class GitHelper
      */
     public static function getIgnoredFiles(string $repo_path): array
     {
-        return array_map(fn($item) => rtrim($item, '/'),
+        return array_map(fn($item) => rtrim($item, DIRECTORY_SEPARATOR),
             explode(
-                "\n",
+                PHP_EOL,
                 trim(shell_exec("git -C $repo_path ls-files --exclude-standard -oi --directory"))
             ));
     }
@@ -50,5 +51,25 @@ class GitHelper
     public static function init(string $repo_path): bool
     {
         return 0 === (int) shell_exec("git -C $repo_path init");
+    }
+
+    /**
+     * Get the current git branch
+     * @param string $repo_path
+     * @return string
+     */
+    public static function getCurrentBranch(string $repo_path): string
+    {
+        return trim(shell_exec("git -C $repo_path rev-parse --abbrev-ref HEAD"));
+    }
+
+    /**
+     * Get the current git commit hash
+     * @param string $repo_path
+     * @return string
+     */
+    public static function getCurrentCommitHash(string $repo_path): string
+    {
+        return trim(shell_exec("git -C $repo_path rev-parse HEAD"));
     }
 }

@@ -45,6 +45,11 @@ class BuildAuroraCommand extends Command
         });
 
         $process->wait();
+        if (! $process->isSuccessful()) {
+            $this->error('Mercury build failed! Check the logs for more information.');
+            ResetTerminal::reset();
+            return 1;
+        }
         $this->info('Mercury build complete!');
         $this->info('Done! Happy coding!');
 
