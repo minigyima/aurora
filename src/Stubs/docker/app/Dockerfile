@@ -20,24 +20,33 @@ RUN apk add --no-cache rsync && \
 
 RUN echo 'Installing packages...'
 RUN apk update && \
-    apk add libstdc++ \
-    gcompat \
-    bzip2-dev \
-    coreutils \
+    apk add --no-cache --virtual .mercury-build-deps $PHPIZE_DEPS \
     freetype-dev \
-    libjpeg-turbo-dev \
     libpng-dev \
+    libxml2-dev \
+    libpq-dev \
+    icu-dev \
+    bzip2-dev \
+    pcre-dev \
+    linux-headers
+
+RUN apk add --no-cache libstdc++ \
+    gcompat \
+    coreutils \
     postgresql-client \
     figlet \
     mc \
     vim \
     unzip \
-    libpq-dev \
-    libzip-dev \
-    libxml2-dev \
     busybox-extras \
     supervisor \
-    bash
+    bash \
+    git \
+    ca-certificates \
+    nginx \
+    imagemagick-dev \
+    libzip-dev \
+    libjpeg-turbo-dev
 
 RUN echo "export PROC_COUNT=`nproc`" >> /envfile
 RUN . /envfile; echo "Processors: $PROC_COUNT --> -j$PROC_COUNT"
@@ -61,7 +70,6 @@ RUN . /envfile; docker-php-ext-install -j$PROC_COUNT bcmath \
     posix
 
 
-RUN apk --no-cache add pcre-dev imagemagick-dev linux-headers imagemagick-dev ${PHPIZE_DEPS}
 ENV MAKEFLAGS="-j$(nproc)"
 # PECL extensions
 RUN MAKEFLAGS="-j$(nproc)" pecl install redis
@@ -69,7 +77,6 @@ RUN MAKEFLAGS="-j$(nproc)" pecl install redis
 RUN MAKEFLAGS="-j$(nproc)" pecl install xdebug
 RUN MAKEFLAGS="-j$(nproc)" pecl install openswoole-22.1.2
 
-RUN apk add git
 RUN git clone https://github.com/Imagick/imagick && \
     cd imagick && \
     phpize && ./configure && \
@@ -80,8 +87,6 @@ RUN git clone https://github.com/Imagick/imagick && \
 
 #RUN docker-php-ext-enable redis gd dom openswoole
 RUN docker-php-ext-enable redis imagick gd dom openswoole
-
-RUN apk add ca-certificates icu-dev nginx
 
 RUN . /envfile; docker-php-ext-configure intl && docker-php-ext-install -j$PROC_COUNT intl
 

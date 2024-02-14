@@ -9,7 +9,7 @@ FROM postgres:16-alpine as postgres
 FROM mercury
 WORKDIR /srv/www/
 
-RUN apk del ${PHPIZE_DEPS}
+RUN apk del .mercury-build-deps
 
 RUN apk add --no-cache rsync tzdata postgresql16 su-exec
 
@@ -18,24 +18,24 @@ COPY --from=redis /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entr
 
 # From https://github.com/docker-library/redis/blob/b77450d34ae54354f41970fc44bf840353f59ef4/7.2/alpine/Dockerfile
 RUN set -eux; \
-# alpine already has a gid 999, so we'll use the next id
-	addgroup -S -g 1000 redis; \
-	adduser -S -G redis -u 999 redis
+    # alpine already has a gid 999, so we'll use the next id
+    addgroup -S -g 1000 redis; \
+    adduser -S -G redis -u 999 redis
 
 # From https://github.com/docker-library/redis/blob/b77450d34ae54354f41970fc44bf840353f59ef4/7.2/alpine/Dockerfile
 RUN set -eux; \
-# alpine already has a gid 999, so we'll use the next id
-	addgroup -S -g 1001 aurora; \
-	adduser -S -G aurora -u 1000 aurora
+    # alpine already has a gid 999, so we'll use the next id
+    addgroup -S -g 1001 aurora; \
+    adduser -S -G aurora -u 1000 aurora
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
 RUN set -eux; \
     deluser postgres; \
-	addgroup -g 70 -S postgres; \
-	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
-	mkdir -p /var/lib/postgresql; \
-	chown -R postgres:postgres /var/lib/postgresql
+    addgroup -g 70 -S postgres; \
+    adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
+    mkdir -p /var/lib/postgresql; \
+    chown -R postgres:postgres /var/lib/postgresql
 
 
 RUN rsync -avz /redis/* /usr/local/bin/ && \
@@ -61,7 +61,7 @@ VOLUME /var/lib/postgresql/data
 WORKDIR /srv/www/
 
 COPY storage/aurora/temp/assets/git_commit /current_git_commit
-COPY storage/aurora/temp/assets/nginx.conf /etc/nginx/conf.d/default.conf
+COPY storage/aurora/temp/assets/nginx.conf /etc/nginx/nginx.conf
 COPY storage/aurora/temp/assets/redis.conf /etc/redis.conf
 COPY storage/aurora/temp/assets/supervisord.conf /etc/supervisord.conf
 COPY storage/aurora/temp/assets/supervisord/* /etc/supervisor/conf.d/.
