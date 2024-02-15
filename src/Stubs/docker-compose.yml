@@ -13,6 +13,7 @@ services:
             - 9000
         volumes:
             - '../../../../../:/srv/www/'
+            - bootstrap_cache:/srv/www/bootstrap/cache
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         depends_on:
@@ -27,6 +28,7 @@ services:
         tty: true
         volumes:
             - '../../../../../:/srv/www/'
+            - bootstrap_cache:/srv/www/bootstrap/cache
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         profiles:
@@ -41,6 +43,7 @@ services:
         tty: true
         volumes:
             - '../../../../../:/srv/www/'
+            - bootstrap_cache:/srv/www/bootstrap/cache
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         profiles:
@@ -136,3 +139,7 @@ networks:
         ipam:
             config:
                 -   subnet: 172.128.0.0/16
+
+volumes:
+    bootstrap_cache:
+        driver: local
