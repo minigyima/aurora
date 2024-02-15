@@ -73,7 +73,7 @@ class Mercury extends AbstractSingleton
         $this->auroraThread = $this->createAuroraThread();
 
         if (! self::runningInProduction()) {
-            ConsoleLogger::log_info('Starting File Watcher...', 'Aurora');
+            ConsoleLogger::log_info('Starting File Watcher...');
             $watcher = Watch::paths([base_path('.env')]);
 
             $watcher->onFileUpdated(function (string $file) use ($watcher) {

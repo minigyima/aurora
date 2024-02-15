@@ -22,6 +22,20 @@ use stdClass;
 use Symfony\Component\Process\Process;
 
 /**
+ * Resolve a path
+ * @param string ...$paths
+ * @return string|false
+ */
+function path_resolve(string ...$paths): string|false
+{
+    $path_array = array_map(fn($path) => rtrim($path, DIRECTORY_SEPARATOR), $paths);
+    $path = implode(DIRECTORY_SEPARATOR, $path_array);
+    $path_clean = str_replace(' ', '\ ', $path);
+    return realpath($path_clean);
+}
+
+
+/**
  * Recursively delete a directory and all of it's contents - e.g.the equivalent of `rm -r` on the command-line.
  * Consistent with `rmdir()` and `unlink()`, an E_WARNING level error will be generated on failure.
  *
@@ -32,6 +46,8 @@ use Symfony\Component\Process\Process;
  */
 function rrmdir(string $source, bool $removeOnlyChildren = false): bool
 {
+    $source = path_resolve($source);
+
     if (empty($source) || file_exists($source) === false) {
         return false;
     }
@@ -121,6 +137,8 @@ function rsync_repo_ignore(string $source, string $destination, bool $ignoreGitD
  */
 function rsync(string $source, string $destination, array $excluded_files = []): int
 {
+    $source = path_resolve($source);
+    
     $excluded = array_map(fn($item) => "'" . rtrim($item, DIRECTORY_SEPARATOR) . "'", $excluded_files);
 
     $excluded = implode(',', $excluded);
@@ -138,5 +156,3 @@ function rsync(string $source, string $destination, array $excluded_files = []):
 
     return $process->wait();
 }
-
-

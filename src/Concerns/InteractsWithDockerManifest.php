@@ -4,6 +4,7 @@ namespace Minigyima\Aurora\Concerns;
 
 use Minigyima\Aurora\Config\Constants;
 use Minigyima\Aurora\Support\ConsoleLogger;
+use function Minigyima\Aurora\Support\path_resolve;
 
 /**
  * InteractsWithDockerManifest - Trait for interacting with the docker manifest
@@ -33,7 +34,9 @@ trait InteractsWithDockerManifest
             ConsoleLogger::log_warning('Using published docker files', 'InteractsWithDockerManifest::makeManifest');
             $isPublished = true;
         } else {
-            $files = scandir(__DIR__ . '/../Stubs/docker/app');
+            $files = scandir(
+                path_resolve(__DIR__, '/../Stubs/docker/app')
+            );
         }
 
         return $this->scan_files_hash($files, $isPublished);

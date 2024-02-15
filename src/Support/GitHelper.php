@@ -18,7 +18,8 @@ class GitHelper
      */
     public static function isRepo(string $repo_path): bool
     {
-        $process = Process::fromShellCommandline("git -C $repo_path rev-parse");
+        $path = path_resolve($repo_path);
+        $process = Process::fromShellCommandline("git -C $path rev-parse");
         return 0 === $process->run();
     }
 
@@ -29,7 +30,8 @@ class GitHelper
      */
     public static function isDirty(string $repo_path): bool
     {
-        return '' != shell_exec("git -C $repo_path status --porcelain");
+        $path = path_resolve($repo_path);
+        return '' != shell_exec("git -C $path status --porcelain");
     }
 
     /**
@@ -39,10 +41,11 @@ class GitHelper
      */
     public static function getIgnoredFiles(string $repo_path): array
     {
+        $path = path_resolve($repo_path);
         return array_map(fn($item) => rtrim($item, DIRECTORY_SEPARATOR),
             explode(
                 PHP_EOL,
-                trim(shell_exec("git -C $repo_path ls-files --exclude-standard -oi --directory"))
+                trim(shell_exec("git -C $path ls-files --exclude-standard -oi --directory"))
             ));
     }
 
@@ -53,7 +56,8 @@ class GitHelper
      */
     public static function init(string $repo_path): bool
     {
-        return 0 === (int) shell_exec("git -C $repo_path init");
+        $path = path_resolve($repo_path);
+        return 0 === (int) shell_exec("git -C $path init");
     }
 
     /**
@@ -63,7 +67,8 @@ class GitHelper
      */
     public static function getCurrentBranch(string $repo_path): string
     {
-        return trim(shell_exec("git -C $repo_path rev-parse --abbrev-ref HEAD"));
+        $path = path_resolve($repo_path);
+        return trim(shell_exec("git -C $path rev-parse --abbrev-ref HEAD"));
     }
 
     /**
@@ -73,6 +78,7 @@ class GitHelper
      */
     public static function getCurrentCommitHash(string $repo_path): string
     {
-        return trim(shell_exec("git -C $repo_path rev-parse HEAD"));
+        $path = path_resolve($repo_path);
+        return trim(shell_exec("git -C $path rev-parse HEAD"));
     }
 }

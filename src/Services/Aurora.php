@@ -24,6 +24,7 @@ use Minigyima\Aurora\Support\StrClean;
 use Override;
 use Symfony\Component\Process\Process;
 use function Laravel\Prompts\confirm;
+use function Minigyima\Aurora\Support\path_resolve;
 
 /**
  * Aurora - The Aurora Runtime, used to manage the Aurora Docker environment
@@ -191,7 +192,7 @@ class Aurora extends AbstractSingleton
                 mkdir(Constants::AURORA_BUILD_PATH, 0777, true);
             }
 
-            $export_dir = rtrim(realpath($export_dir), DIRECTORY_SEPARATOR);
+            $export_dir = path_resolve($export_dir);
 
             if (! file_exists($export_dir)) {
                 ConsoleLogger::log_error('The export directory does not exist. Please create it and try again.');
@@ -216,7 +217,7 @@ class Aurora extends AbstractSingleton
                 );
             }
 
-            $path = $export_dir . '/' . $this->docker_tag . '.docker';
+            $path = path_resolve($export_dir, $this->docker_tag . '.docker');
             $command = self::generateDockerSaveCommand($this->docker_tag, $path);
             ConsoleLogger::log_trace('Creating tarball @ ' . $path);
 

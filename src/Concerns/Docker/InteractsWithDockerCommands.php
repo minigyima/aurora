@@ -3,6 +3,7 @@
 namespace Minigyima\Aurora\Concerns\Docker;
 
 use Minigyima\Aurora\Support\ConsoleLogger;
+use function Minigyima\Aurora\Support\path_resolve;
 
 /**
  * Trait for interacting with Docker commands
@@ -26,11 +27,15 @@ trait InteractsWithDockerCommands
         $files[] = self::getCurrentComposeFile();
 
         if (file_exists(base_path('docker-compose.override.yaml'))) {
-            $files[] = base_path('docker-compose.override.yaml');
+            $files[] = path_resolve(
+                base_path('docker-compose.override.yaml')
+            );
         }
 
         if (file_exists(base_path('docker-compose.override.yml'))) {
-            $files[] = base_path('docker-compose.override.yml');
+            $files[] = path_resolve(
+                base_path('docker-compose.override.yml')
+            );
         }
 
         $profiles = [];
@@ -74,6 +79,7 @@ trait InteractsWithDockerCommands
      */
     private function generateDockerBuildCommand(string $docker_tag, string $path): string
     {
+        $path = path_resolve($path);
         $tag_base = explode(':', $docker_tag)[0];
         $tag_latest = $tag_base . ':latest';
         $command = 'docker build -t ' . $tag_latest . ' -t ' . $docker_tag . ' ' . $path;
@@ -89,6 +95,7 @@ trait InteractsWithDockerCommands
      */
     private function generateDockerSaveCommand(string $docker_tag, string $path): string
     {
+        $path = path_resolve($path);
         $command = 'docker save -o ' . $path . ' ' . $docker_tag;
         ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
         return $command;
