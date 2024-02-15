@@ -2,6 +2,7 @@
 
 namespace Minigyima\Aurora\Support;
 
+use Minigyima\Aurora\Concerns\ResolvesPaths;
 use Symfony\Component\Process\Process;
 
 /**
@@ -11,6 +12,8 @@ use Symfony\Component\Process\Process;
  */
 class GitHelper
 {
+    use ResolvesPaths;
+
     /**
      * Check if a given path is a git repository
      * @param string $repo_path
@@ -18,7 +21,7 @@ class GitHelper
      */
     public static function isRepo(string $repo_path): bool
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         $process = Process::fromShellCommandline("git -C $path rev-parse");
         return 0 === $process->run();
     }
@@ -30,7 +33,7 @@ class GitHelper
      */
     public static function isDirty(string $repo_path): bool
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         return '' != shell_exec("git -C $path status --porcelain");
     }
 
@@ -41,7 +44,7 @@ class GitHelper
      */
     public static function getIgnoredFiles(string $repo_path): array
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         return array_map(fn($item) => rtrim($item, DIRECTORY_SEPARATOR),
             explode(
                 PHP_EOL,
@@ -56,7 +59,7 @@ class GitHelper
      */
     public static function init(string $repo_path): bool
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         return 0 === (int) shell_exec("git -C $path init");
     }
 
@@ -67,7 +70,7 @@ class GitHelper
      */
     public static function getCurrentBranch(string $repo_path): string
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         return trim(shell_exec("git -C $path rev-parse --abbrev-ref HEAD"));
     }
 
@@ -78,7 +81,7 @@ class GitHelper
      */
     public static function getCurrentCommitHash(string $repo_path): string
     {
-        $path = path_resolve($repo_path);
+        $path = self::path_resolve($repo_path);
         return trim(shell_exec("git -C $path rev-parse HEAD"));
     }
 }

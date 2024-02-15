@@ -26,12 +26,9 @@ use Symfony\Component\Process\Process;
  * @param string ...$paths
  * @return string|false
  */
-function path_resolve(string ...$paths): string|false
+function path_resolve(string ...$paths): string
 {
-    $path_array = array_map(fn($path) => rtrim($path, DIRECTORY_SEPARATOR), $paths);
-    $path = implode(DIRECTORY_SEPARATOR, $path_array);
-    $path_clean = str_replace(' ', '\ ', $path);
-    return realpath($path_clean);
+    return GitHelper::path_resolve(...$paths);
 }
 
 
@@ -46,8 +43,6 @@ function path_resolve(string ...$paths): string|false
  */
 function rrmdir(string $source, bool $removeOnlyChildren = false): bool
 {
-    $source = path_resolve($source);
-
     if (empty($source) || file_exists($source) === false) {
         return false;
     }
@@ -138,7 +133,7 @@ function rsync_repo_ignore(string $source, string $destination, bool $ignoreGitD
 function rsync(string $source, string $destination, array $excluded_files = []): int
 {
     $source = path_resolve($source);
-    
+
     $excluded = array_map(fn($item) => "'" . rtrim($item, DIRECTORY_SEPARATOR) . "'", $excluded_files);
 
     $excluded = implode(',', $excluded);
