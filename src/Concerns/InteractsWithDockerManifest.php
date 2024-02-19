@@ -46,6 +46,7 @@ trait InteractsWithDockerManifest
      * Scan the files and hash them
      * @param array $files
      * @param bool $isPublished
+     * @param bool $is_subdir
      * @return array
      */
     private function scan_files_hash(array $files, bool $isPublished = false, bool $is_subdir = false): array
