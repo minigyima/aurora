@@ -17,17 +17,13 @@ trait EnsuresAuroraStorageExists
      */
     private function ensureStorageExists(): void
     {
-        if (! file_exists(
-            path_resolve(
-                base_path(Constants::AURORA_DOCKER_STORAGE_PATH)
-            )
-        )) {
+        if (! file_exists(base_path(Constants::AURORA_DOCKER_STORAGE_PATH))) {
             mkdir(
                 path_resolve(
                     base_path(Constants::AURORA_DOCKER_STORAGE_PATH),
-                    0777,
-                    true
-                )
+                ),
+                0777,
+                true
             );
         }
 

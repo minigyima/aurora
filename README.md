@@ -1,3 +1,3 @@
 # Aurora
 
-- An application framework / starter kit for Laravel that simplifies API development 
+-   An application framework / starter kit for Laravel that simplifies API development

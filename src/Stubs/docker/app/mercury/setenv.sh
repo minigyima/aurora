@@ -33,11 +33,3 @@ PNPM_PATH=$(which pnpm)
 
 # PHP PATH
 PHP_PATH="/usr/local/bin/php"
-
-# Logger vars
-Color_Off='\033[0m'
-Red='\033[1;31m'
-Green='\033[0;32m'
-Yellow='\033[0;33m'
-Blue='\033[0;34m'
-Purple='\033[1;35m'
