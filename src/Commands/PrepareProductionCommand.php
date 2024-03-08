@@ -90,7 +90,7 @@ class PrepareProductionCommand extends Command
             $soketi_port = config('broadcasting.connections.pusher.options.port');
 
             $soketi_config = [
-                'debug' => false,
+                'debug' => config('aurora.soketi_debug'),
                 'port' => $soketi_port,
                 'metrics' => [
                     'enabled' => true,
