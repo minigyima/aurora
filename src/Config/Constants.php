@@ -119,4 +119,6 @@ class Constants
         '.env.aurora.bak',
         Constants::AURORA_STORAGE_PATH,
     ];
+
+    public const string AURORA_HOOKS_PATH = 'aurora_hooks';
 }
