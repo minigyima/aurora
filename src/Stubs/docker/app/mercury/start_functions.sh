@@ -49,7 +49,7 @@ boot_horizon() {
     done
 
     log_info "Horizon is ready, starting..."
-    
+
     $PHP_PATH artisan mercury:boot-horizon
 }
 

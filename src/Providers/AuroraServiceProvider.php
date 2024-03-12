@@ -4,7 +4,9 @@ namespace Minigyima\Aurora\Providers;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Console\AboutCommand;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
+use Minigyima\Aurora\Cache\AuroraCache;
 use Minigyima\Aurora\Commands\AuroraShellCommand;
 use Minigyima\Aurora\Commands\BuildAuroraCommand;
 use Minigyima\Aurora\Commands\BuildProductionCommand;
@@ -65,7 +67,9 @@ class AuroraServiceProvider extends ServiceProvider
             ]
         );
 
-
+        Cache::extend('aurora', function ($app) {
+            return Cache::repository(new \Minigyima\Aurora\Services\AuroraCache());
+        });
     }
 
     private function publish(): void
