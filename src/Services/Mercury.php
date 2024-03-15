@@ -183,6 +183,12 @@ class Mercury extends AbstractSingleton
                 $thread->start();
             });
 
+            $watcher->onFileCreated(function (string $file) use ($thread) {
+                ConsoleLogger::log_info("File created: $file --> Restarting Horizon...", 'Mercury');
+                $thread->stop();
+                $thread->start();
+            });
+
             $watcher->onFileDeleted(function (string $file) use ($thread) {
                 ConsoleLogger::log_info("File deleted: $file --> Restarting Horizon...", 'Mercury');
                 $thread->stop();
