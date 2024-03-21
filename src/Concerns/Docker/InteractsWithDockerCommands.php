@@ -38,6 +38,18 @@ trait InteractsWithDockerCommands
             );
         }
 
+        if (file_exists(base_path('docker-compose.aurora.extra.yaml'))) {
+            $files[] = path_resolve(
+                base_path('docker-compose.aurora.extra.yaml')
+            );
+        }
+
+        if (file_exists(base_path('docker-compose.aurora.extra.yml'))) {
+            $files[] = path_resolve(
+                base_path('docker-compose.aurora.extra.yml')
+            );
+        }
+
         $profiles = [];
         if (config('aurora.sockets_enabled')) {
             $profiles[] = 'sockets';
