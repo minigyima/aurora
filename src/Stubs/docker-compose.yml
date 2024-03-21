@@ -14,7 +14,7 @@ services:
         volumes:
             - '../../../../../:/srv/www/'
             - bootstrap_cache:/srv/www/bootstrap/cache
-            - node_modules:/srv/www/node_modules
+            - '../../../../../storage/aurora/mercury/node_modules:/srv/www/node_modules'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         depends_on:
@@ -30,7 +30,7 @@ services:
         volumes:
             - '../../../../../:/srv/www/'
             - bootstrap_cache:/srv/www/bootstrap/cache
-            - node_modules:/srv/www/node_modules
+            - '../../../../../storage/aurora/mercury/node_modules:/srv/www/node_modules'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         profiles:
@@ -46,7 +46,7 @@ services:
         volumes:
             - '../../../../../:/srv/www/'
             - bootstrap_cache:/srv/www/bootstrap/cache
-            - node_modules:/srv/www/node_modules
+            - '../../../../../storage/aurora/mercury/node_modules:/srv/www/node_modules'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
             - '../../../../../storage/aurora/mercury/root:/root'
         profiles:
