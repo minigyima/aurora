@@ -11,7 +11,7 @@ composer() {
 npm() {
     log_info "Installing dependencies using pnpm..."
     log_trace "Removing node_modules..."
-    rm -rf node_modules
+    rm -rf node_modules/**
     log_trace "Invoking pnpm..."
     pnpm update
     log_trace "Installing chokidar..."
