@@ -218,6 +218,7 @@ class Aurora extends AbstractSingleton
             }
 
             $path = path_resolve($export_dir, $this->docker_tag . '.docker');
+            $path = str_replace(':', '_', $path);
             $command = self::generateDockerSaveCommand($this->docker_tag, $path);
             ConsoleLogger::log_trace('Creating tarball @ ' . $path);
 
