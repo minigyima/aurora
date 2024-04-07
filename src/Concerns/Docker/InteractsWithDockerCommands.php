@@ -108,7 +108,9 @@ trait InteractsWithDockerCommands
     private function generateDockerSaveCommand(string $docker_tag, string $path): string
     {
         $path = path_resolve($path);
-        $command = 'docker save -o ' . $path . ' ' . $docker_tag;
+        $tag_base = explode(':', $docker_tag)[0];
+        $tag_latest = $tag_base . ':latest';
+        $command = 'docker save -o ' . $path . ' ' . $docker_tag . ' ' . $tag_latest;
         ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
         return $command;
     }
