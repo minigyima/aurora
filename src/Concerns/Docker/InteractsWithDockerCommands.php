@@ -94,7 +94,7 @@ trait InteractsWithDockerCommands
         $path = path_resolve($path);
         $tag_base = explode(':', $docker_tag)[0];
         $tag_latest = $tag_base . ':latest';
-        $command = 'docker build -t ' . $tag_latest . ' -t ' . $docker_tag . ' ' . $path;
+        $command = "docker build -t $tag_latest -t $docker_tag $path";
         ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
         return $command;
     }
@@ -110,7 +110,7 @@ trait InteractsWithDockerCommands
         $path = path_resolve($path);
         $tag_base = explode(':', $docker_tag)[0];
         $tag_latest = $tag_base . ':latest';
-        $command = 'docker save -o ' . $path . ' ' . $docker_tag . ' ' . $tag_latest;
+        $command = "docker save -o $path $docker_tag $tag_latest";
         ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
         return $command;
     }
