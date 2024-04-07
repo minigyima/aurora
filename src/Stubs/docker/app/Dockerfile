@@ -59,6 +59,7 @@ RUN . /envfile; docker-php-ext-install -j$PROC_COUNT bcmath \
     exif \
     opcache \
     pdo_pgsql \
+    pdo_mysql \
     zip \
     pcntl \
     gd \
