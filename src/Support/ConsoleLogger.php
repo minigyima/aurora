@@ -21,7 +21,8 @@ class ConsoleLogger
     {
         $logMsg = date('Y-m-d H:i:s') . " [info] @ $sender: $message\n";
         $formatter = new OutputFormatterStyle('blue', 'default', ['bold']);
-        fwrite(STDERR, $formatter->apply($logMsg));
+
+        self::log_stderr($formatter->apply($logMsg));
     }
 
     /**
@@ -34,7 +35,8 @@ class ConsoleLogger
     {
         $logMsg = date('Y-m-d H:i:s') . " [success] @ $sender: $message\n";
         $formatter = new OutputFormatterStyle('green', 'default', ['bold']);
-        fwrite(STDERR, $formatter->apply("$logMsg"));
+
+        self::log_stderr($formatter->apply($logMsg));
     }
 
     /**
@@ -47,7 +49,8 @@ class ConsoleLogger
     {
         $logMsg = date('Y-m-d H:i:s') . " [warn] @ $sender: $message\n";
         $formatter = new OutputFormatterStyle('yellow', 'default', ['bold']);
-        fwrite(STDERR, $formatter->apply($logMsg));
+
+        self::log_stderr($formatter->apply($logMsg));
     }
 
     /**
@@ -60,7 +63,8 @@ class ConsoleLogger
     {
         $logMsg = date('Y-m-d H:i:s') . " [err] @ $sender: $message\n";
         $formatter = new OutputFormatterStyle('red', 'default', ['bold']);
-        fwrite(STDERR, $formatter->apply($logMsg));
+
+        self::log_stderr($formatter->apply($logMsg));
     }
 
     /**
@@ -73,6 +77,16 @@ class ConsoleLogger
     {
         $logMsg = date('Y-m-d H:i:s') . " [trace] @ $sender: $message\n";
         $formatter = new OutputFormatterStyle('magenta', 'default', ['bold']);
-        fwrite(STDERR, $formatter->apply($logMsg));
+
+        self::log_stderr($formatter->apply($logMsg));
+    }
+
+    private static function log_stderr(string $message) {
+        if(CheckForSwoole::check()) {
+            fwrite(STDERR, $message);
+        }
+        else {
+            fwrite(fopen('php://stderr', 'wb'), $message);
+        }
     }
 }
