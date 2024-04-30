@@ -26,7 +26,7 @@ class BuildProductionCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'aurora:build-production {--yes : Skip confirmation prompt} {--export : Export the production build} {--directory= : The directory to export the production build to}';
+    protected $signature = 'aurora:build-production {--yes : Skip confirmation prompt} {--export : Export the production build} {--directory= : The directory to export the production build to} {--push : Push the image to the registry specified in the config}';
 
     /**
      * The console command description.
@@ -40,9 +40,13 @@ class BuildProductionCommand extends Command
      */
     public function handle(): int
     {
+        ConsoleLogger::log_info('Clearing configuration cache...', 'BuildProductionCommand');
+        $this->call('config:cache');
+
         $yes = $this->option('yes');
         $export = $this->option('export');
         $directory = $this->option('directory');
+        $push = $this->option('push');
 
         $app_name = config('app.name');
         ConsoleLogger::log_info('Building production for ' . $app_name, 'BuildProductionCommand');
@@ -94,7 +98,8 @@ class BuildProductionCommand extends Command
             $aurora->buildProduction(
                 export: $export,
                 export_dir: $directory ?? Constants::AURORA_BUILD_PATH,
-                yes: $yes
+                yes: $yes,
+                push: $push
             );
         } catch (AuroraException $e) {
             return self::FAILURE;

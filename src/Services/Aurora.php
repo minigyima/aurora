@@ -8,6 +8,7 @@ use Minigyima\Aurora\Concerns\Build\PreparesTempDirectory;
 use Minigyima\Aurora\Concerns\Build\RunsPreFlightChecks;
 use Minigyima\Aurora\Concerns\Docker\InteractsWithComposeFiles;
 use Minigyima\Aurora\Concerns\Docker\InteractsWithDockerCommands;
+use Minigyima\Aurora\Concerns\Docker\InteractsWithDockerImages;
 use Minigyima\Aurora\Concerns\EnsuresAuroraStorageExists;
 use Minigyima\Aurora\Concerns\TestsForDocker;
 use Minigyima\Aurora\Concerns\VerifiesEnvironment;
@@ -24,7 +25,6 @@ use Minigyima\Aurora\Support\StrClean;
 use Override;
 use Symfony\Component\Process\Process;
 use function Laravel\Prompts\confirm;
-use function Minigyima\Aurora\Support\path_resolve;
 
 /**
  * Aurora - The Aurora Runtime, used to manage the Aurora Docker environment
@@ -41,7 +41,8 @@ class Aurora extends AbstractSingleton
         EnsuresAuroraStorageExists,
         PreparesTempDirectory,
         CreatesProdDockerfile,
-        InteractsWithDockerCommands;
+        InteractsWithDockerCommands,
+        InteractsWithDockerImages;
 
     /**
      * @var bool
@@ -149,7 +150,8 @@ class Aurora extends AbstractSingleton
     public function buildProduction(
         bool   $export = false,
         string $export_dir = Constants::AURORA_BUILD_PATH,
-        bool   $yes = false
+        bool   $yes = false,
+        bool   $push = false,
     ): void {
         $this->preFlightChecks($yes);
         ConsoleLogger::log_info('Building production...');
@@ -179,58 +181,18 @@ class Aurora extends AbstractSingleton
             throw new DockerBuildFailedException(
                 'The Docker build process ended with a non-zero exit code. Check the logs for more information.'
             );
-
         }
         $this->rmTemp();
 
         ConsoleLogger::log_success('Image built successfully. Tag: ' . $this->docker_tag);
 
         if ((! ($yes && ! $export)) && ($export || confirm('Would you like to export the image?'))) {
-            ConsoleLogger::log_info('Exporting image...');
+            $this->exportImage($this->docker_tag, $export_dir);
+        }
 
-            if (! file_exists(Constants::AURORA_BUILD_PATH)) {
-                mkdir(Constants::AURORA_BUILD_PATH, 0777, true);
-            }
-
-            $export_dir = path_resolve($export_dir);
-
-            if (! file_exists($export_dir)) {
-                ConsoleLogger::log_error('The export directory does not exist. Please create it and try again.');
-                throw new DockerExportException(
-                    'The export directory does not exist. Please create it and try again.'
-                );
-            }
-
-            if (! is_dir($export_dir)) {
-                ConsoleLogger::log_error('The export directory is not a directory. Please create it and try again.');
-                throw new DockerExportException(
-                    'The export directory is not a directory. Please create it and try again.'
-                );
-            }
-
-            if (! is_writable($export_dir)) {
-                ConsoleLogger::log_error(
-                    'The export directory is not writable. Please check the permissions and try again.'
-                );
-                throw new DockerExportException(
-                    'The export directory is not writable. Please check the permissions and try again.'
-                );
-            }
-
-            $path = path_resolve($export_dir, $this->docker_tag . '.docker');
-            $path = str_replace(':', '_', $path);
-            $command = self::generateDockerSaveCommand($this->docker_tag, $path);
-            ConsoleLogger::log_trace('Creating tarball @ ' . $path);
-
-            $process = Process::fromShellCommandline($command);
-            $process->setTimeout(0);
-            $process->run(function ($type, $buffer) {
-                ConsoleLogger::log_info($buffer, 'docker');
-            });
-
-            $process->wait();
-
-            ConsoleLogger::log_success('Image exported successfully. Path: ' . base_path($path));
+        if ((! ($yes && ! $push)) && ($push || confirm('Would you like to push the image to the registry?'))) {
+            $this->verifyDockerRegistry();
+            $this->pushImage($this->docker_tag);
         }
     }
 

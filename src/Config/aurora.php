@@ -147,4 +147,44 @@ return [
     */
     'config_model' => Minigyima\Aurora\Config\ConfigManager\Models\BaseConfig::class,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Docker registry username
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the username used to login to the docker registry
+    |
+    */
+    'docker_registry_username' => env('AURORA_DOCKER_REGISTRY_USERNAME', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Docker registry password
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the password used to login to the docker registry
+    |
+    */
+    'docker_registry_password' => env('AURORA_DOCKER_REGISTRY_PASSWORD', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Docker registry URL
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the URL of the docker registry
+    |
+    */
+    'docker_registry_url' => env('AURORA_DOCKER_REGISTRY_URL', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Docker registry namespace
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the namespace of the docker registry
+    |
+    */
+    'docker_registry_namespace' => env('AURORA_DOCKER_REGISTRY_NAMESPACE', ''),
+
 ];

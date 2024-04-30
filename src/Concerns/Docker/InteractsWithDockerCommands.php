@@ -114,4 +114,60 @@ trait InteractsWithDockerCommands
         ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
         return $command;
     }
+
+    /**
+     * Generate the Docker tag command, to tag the image with the latest registry's tag
+     * @param string $docker_tag
+     * @return string
+     */
+    private function generateDockerTagCommand(string $docker_tag)
+    {
+        $tag_base = explode(':', $docker_tag)[0];
+        $tag_latest = $tag_base . ':latest';
+
+        $registry_url = config('aurora.docker_registry_url');
+        $registry_namespace = config('aurora.docker_registry_namespace');
+
+        $command = "docker tag $docker_tag $registry_url/$registry_namespace/$tag_latest && " .
+                   "docker tag $docker_tag $registry_url/$registry_namespace/$docker_tag";
+
+        ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
+        return $command;
+    }
+
+    /**
+     * Generate the Docker push command
+     * @param string $docker_tag
+     * @return string
+     */
+    private function generateDockerPushCommand(string $docker_tag): string
+    {
+        $tag_base = explode(':', $docker_tag)[0];
+        $tag_latest = $tag_base . ':latest';
+
+        $registry_url = config('aurora.docker_registry_url');
+        $registry_namespace = config('aurora.docker_registry_namespace');
+
+        $tag_registry = "$registry_url/$registry_namespace/$docker_tag";
+        $tag_registry_latest = "$registry_url/$registry_namespace/$tag_latest";
+
+        $command = "docker push $tag_registry && docker push $tag_registry_latest";
+        ConsoleLogger::log_trace("Docker command: $command", 'InteractsWithDockerCommands');
+        return $command;
+    }
+
+    /**
+     * Generate the Docker login command
+     * @return string
+     */
+    private function generateDockerLoginCommand(): string
+    {
+        $username = config('aurora.docker_registry_username');
+        $password = config('aurora.docker_registry_password');
+        $registry_url = config('aurora.docker_registry_url');
+        $command = "docker login -u $username -p $password $registry_url";
+        $command_redacted = "docker login -u $username -p ****** $registry_url";
+        ConsoleLogger::log_trace("Docker command: $command_redacted", 'InteractsWithDockerCommands');
+        return $command;
+    }
 }
