@@ -20,7 +20,7 @@ chown -R aurora:aurora /var/log/nginx
 chown root:aurora /etc/nginx/nginx.conf
 chmod 640 /etc/nginx/nginx.conf
 
-chmod -R 777 /srv/www/storage/framework /srv/www/storage/logs
+chmod -R 777 /srv/www/storage/framework /srv/www/storage/logs /srv/www/bootstrap/cache
 chmod 777 /srv/www/storage/app /srv/www/storage/app/public
 
 /usr/bin/supervisord -c /etc/supervisord.conf
