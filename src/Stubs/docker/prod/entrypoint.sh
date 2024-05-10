@@ -20,7 +20,7 @@ chown -R aurora:aurora /var/log/nginx
 chown root:aurora /etc/nginx/nginx.conf
 chmod 640 /etc/nginx/nginx.conf
 
-chmod -R 777 /srv/www/storage/framework /srv/www/storage/logs /srv/www/bootstrap/cache
+chmod -f -R 777 /srv/www/storage/framework /srv/www/storage/logs /srv/www/bootstrap/cache /srv/www/storage/api-docs /srv/www/storage/permission_cache /srv/www/storage/aurora
 chmod 777 /srv/www/storage/app /srv/www/storage/app/public
 
 su-exec aurora:1001 pnpm run --if-present aurora-prod-onboot
