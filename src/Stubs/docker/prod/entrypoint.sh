@@ -23,4 +23,6 @@ chmod 640 /etc/nginx/nginx.conf
 chmod -R 777 /srv/www/storage/framework /srv/www/storage/logs /srv/www/bootstrap/cache
 chmod 777 /srv/www/storage/app /srv/www/storage/app/public
 
+su-exec aurora:1001 pnpm run --if-present aurora-prod-onboot
+
 /usr/bin/supervisord -c /etc/supervisord.conf
