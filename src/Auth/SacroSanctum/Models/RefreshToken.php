@@ -2,10 +2,10 @@
 
 namespace Minigyima\Aurora\Auth\SacroSanctum\Models;
 
-use App\Helpers\SacroSanctum\Errors\RefreshTokenExpiredException;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Minigyima\Aurora\Auth\SacroSanctum\Errors\RefreshTokenExpiredException;
 
 /**
  * RefreshToken - For regenerating expired tokens
@@ -17,7 +17,7 @@ class RefreshToken extends Model
     protected $hidden = ['token'];
 
     protected $casts = [
-        'expires_at' => 'datetime',
+        'expires_at' => 'timestamp',
         'metadata' => AsArrayObject::class,
     ];
 
