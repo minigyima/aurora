@@ -93,7 +93,7 @@ class Aurora extends AbstractSingleton
             throw new CommandNotApplicableException('This command is not applicable when running in Mercury.');
         }
 
-        if (! self::testForDocker()) {
+        if (!self::testForDocker()) {
             throw new NoDockerException('Docker could not be found on this machine.');
         }
 
@@ -127,12 +127,12 @@ class Aurora extends AbstractSingleton
             throw new CommandNotApplicableException('This command is not applicable when running in Mercury.');
         }
 
-        if (! self::testForDocker()) {
+        if (!self::testForDocker()) {
             throw new NoDockerException('Docker could not be found on this machine.');
         }
         $command = $this->generateComposePrompt('build mercury')
-                   . ' && ' .
-                   $this->generateComposePrompt('build');
+            . ' && ' .
+            $this->generateComposePrompt('build');
 
         return Process::fromShellCommandline($command)->setTimeout(null);
     }
@@ -159,8 +159,8 @@ class Aurora extends AbstractSingleton
         $this->createProdDockerfile($yes);
 
         $this->docker_tag = str_replace([' ', '-'], ['_', '_'], StrClean::clean(strtolower(config('app.name')))) .
-                            ':' .
-                            date('Y-m-d_H-i-s');
+            ':' .
+            date('Y-m-d_H-i-s');
 
         ConsoleLogger::log_info('Building Docker image...');
         $command = self::generateDockerBuildCommand($this->docker_tag, '.');
@@ -186,11 +186,11 @@ class Aurora extends AbstractSingleton
 
         ConsoleLogger::log_success('Image built successfully. Tag: ' . $this->docker_tag);
 
-        if ((! ($yes && ! $export)) && ($export || confirm('Would you like to export the image?'))) {
+        if ((!($yes && !$export)) && ($export || confirm('Would you like to export the image?'))) {
             $this->exportImage($this->docker_tag, $export_dir);
         }
 
-        if ((! ($yes && ! $push)) && ($push || confirm('Would you like to push the image to the registry?'))) {
+        if ((!($yes && !$push)) && ($push || confirm('Would you like to push the image to the registry?'))) {
             $this->verifyDockerRegistry();
             $this->pushImage($this->docker_tag);
         }
@@ -207,7 +207,11 @@ class Aurora extends AbstractSingleton
             throw new CommandNotApplicableException('This command is not applicable when running in Mercury.');
         }
 
-        $command = $this->generateComposePrompt('exec -it mercury bash');
+        $APP_NAME = config('app.name');
+
+        $ps1 = "PS1='($APP_NAME) \h:\w# '";
+
+        $command = $this->generateComposePrompt('exec -it mercury bash -c "' . $ps1 . ' bash"');
         return Process::fromShellCommandline($command)->setTimeout(null)->setTty(true);
     }
 }
