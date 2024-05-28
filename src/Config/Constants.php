@@ -118,6 +118,8 @@ class Constants
         'docker-compose.override.aurora.bak',
         '.env.aurora.bak',
         Constants::AURORA_STORAGE_PATH,
+        'Dockerfile',
+        'Dockerfile.aurora.bak',
     ];
 
     public const string AURORA_HOOKS_PATH = 'aurora_hooks';

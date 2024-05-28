@@ -31,7 +31,7 @@ class PostInstallHandler
         $channel = Log::channel('errorlog');
         $backtrace = debug_backtrace();
         $caller = $backtrace[2]['class'];
-        if ($caller !== 'Illuminate\Foundation\ProviderRepository' && ! $force) {
+        if ($caller !== 'Illuminate\Foundation\ProviderRepository' && !$force) {
             $channel->info(
                 "Aurora (PostInstHandler) - Not called by Laravel's auto-discovery mechanism, skipping postinst script"
             );
@@ -50,10 +50,11 @@ class PostInstallHandler
             $composer['scripts'][$key] = $script;
         }
 
-        if (isset(
+        if (
+            isset(
                 $composer['scripts']['post-update-cmd']
             ) &&
-            ! in_array('@php artisan aurora:update', $composer['scripts']['post-update-cmd'])
+            !in_array('@php artisan aurora:update', $composer['scripts']['post-update-cmd'])
         ) {
             $composer['scripts']['post-update-cmd'][] = '@php artisan aurora:update';
         }
@@ -63,7 +64,7 @@ class PostInstallHandler
 
         $channel->info('Patching .env and .env.example');
 
-        if (! file_exists(base_path('.env'))) {
+        if (!file_exists(base_path('.env'))) {
             $channel->warning('Aurora - .env file does not exist');
             $channel->info('Aurora - Copying .env.example to .env');
             copy(base_path('.env.example'), base_path('.env'));
@@ -110,7 +111,7 @@ class PostInstallHandler
 
         $class->addConstant('PATCHED', true)->setType('bool')->setPublic();
 
-        if (! file_exists(base_path(Constants::AURORA_STORAGE_PATH))) {
+        if (!file_exists(base_path(Constants::AURORA_STORAGE_PATH))) {
             self::log()->info('Aurora - Creating aurora directory');
             mkdir(base_path('storage/aurora'), 0777, true);
         }
@@ -134,14 +135,15 @@ class PostInstallHandler
      */
     public static function initGitIgnore()
     {
-        if (! GitHelper::isRepo(base_path())) {
+        if (!GitHelper::isRepo(base_path())) {
             return;
         }
         $ignored_files = GitHelper::getIgnoredFiles(base_path());
 
+
         $ignored_files_aux = [];
         foreach (Constants::IGNORED_FILES as $file) {
-            if (! in_array(trim($file, '/'), $ignored_files)) {
+            if (!in_array(trim($file, '/'), $ignored_files)) {
                 $ignored_files_aux[] = $file;
             }
         }
