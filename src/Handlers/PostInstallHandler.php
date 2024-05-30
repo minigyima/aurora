@@ -74,7 +74,7 @@ class PostInstallHandler
         $env = new EnvironmentFile();
         $env->set('OCTANE_SERVER', 'swoole');
         $env->set('AURORA_DEBUG', 'false');
-        $env->set('REDIS_HOST', '172.128.4.5');
+        $env->set('REDIS_HOST', '172.20.4.5');
         $env->set('QUEUE_CONNECTION', 'redis');
         $env->set('SESSION_DRIVER', 'redis');
         $env->set('CACHE_DRIVER', 'redis');
@@ -84,7 +84,7 @@ class PostInstallHandler
         $env_example = new EnvironmentFile(base_path('.env.example'));
         $env_example->set('OCTANE_SERVER', 'swoole');
         $env_example->set('AURORA_DEBUG', 'false');
-        $env->set('REDIS_HOST', '172.128.4.5');
+        $env->set('REDIS_HOST', '172.20.4.5');
         $env->set('QUEUE_CONNECTION', 'redis');
         $env->set('SESSION_DRIVER', 'redis');
         $env->set('CACHE_DRIVER', 'redis');

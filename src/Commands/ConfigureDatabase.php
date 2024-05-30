@@ -79,8 +79,8 @@ class ConfigureDatabase extends Command
     {
         $ip_address = text(
             'Please enter the IP address of the database server',
-            validate: fn($value) => filter_var($value, FILTER_VALIDATE_IP) ? $value : 'Invalid IP address',
-            hint: 'e.g: 172.128.1.1'
+            validate: fn ($value) => filter_var($value, FILTER_VALIDATE_IP) ? $value : 'Invalid IP address',
+            hint: 'e.g: 172.20.1.1'
         );
         $db_name = text('Please enter the database name', hint: 'e.g: my_database');
         $username = text('Please enter the database username', hint: 'e.g: my_username');
@@ -94,7 +94,7 @@ class ConfigureDatabase extends Command
         $port = text(
             'Please enter the database port',
             default: 5432,
-            validate: fn($value) => is_numeric($value) ? null : 'Invalid port',
+            validate: fn ($value) => is_numeric($value) ? null : 'Invalid port',
             hint: 'e.g: 5432'
         );
 
@@ -132,7 +132,7 @@ class ConfigureDatabase extends Command
             hint: $write_override ? 'docker-compose.override.yaml and .env will get updated.' : '.env will get updated.'
         );
 
-        if (! $confirmed) {
+        if (!$confirmed) {
             $this->error('Aborted');
             return self::FAILURE;
         }
@@ -223,7 +223,7 @@ class ConfigureDatabase extends Command
             hint: 'This will delete all data in the Postgres database.'
         );
 
-        if (! $prompt) {
+        if (!$prompt) {
             $this->info('Skipping Postgres data deletion.');
             return;
         }
@@ -249,7 +249,7 @@ class ConfigureDatabase extends Command
 
         );
 
-        if (! $confirm) {
+        if (!$confirm) {
             $this->error('Aborted');
             return self::FAILURE;
         }

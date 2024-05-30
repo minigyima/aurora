@@ -7,7 +7,7 @@ services:
         image: mercury
         networks:
             aurora:
-                ipv4_address: 172.128.4.1
+                ipv4_address: 172.20.4.1
         tty: true
         expose:
             - 9000
@@ -25,7 +25,7 @@ services:
         hostname: mercury-horizon
         networks:
             aurora:
-                ipv4_address: 172.128.4.6
+                ipv4_address: 172.20.4.6
         tty: true
         volumes:
             - '../../../../../:/srv/www/'
@@ -41,7 +41,7 @@ services:
         hostname: mercury-cron
         networks:
             aurora:
-                ipv4_address: 172.128.4.7
+                ipv4_address: 172.20.4.7
         tty: true
         volumes:
             - '../../../../../:/srv/www/'
@@ -57,7 +57,7 @@ services:
         hostname: aurora-redis
         networks:
             aurora:
-                ipv4_address: 172.128.4.5
+                ipv4_address: 172.20.4.5
         ports:
             - 127.0.0.1:6379:6379
         command: redis-server /redis/redis.conf
@@ -76,7 +76,7 @@ services:
         hostname: aurora-nginx
         networks:
             aurora:
-                ipv4_address: 172.128.4.2
+                ipv4_address: 172.20.4.2
         volumes:
             - '../../../../../:/srv/www/'
             - '../../../../../storage/aurora/mercury/logs:/var/log'
@@ -91,13 +91,13 @@ services:
     router:
         image: qoomon/docker-host
         hostname: aurora-router
-        cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+        cap_add: ['NET_ADMIN', 'NET_RAW']
         restart: on-failure
         environment:
             - PORTS=9000
         networks:
             aurora:
-                ipv4_address: 172.128.4.4
+                ipv4_address: 172.20.4.4
 
     soketi:
         image: quay.io/soketi/soketi:1.0-16-alpine
@@ -109,12 +109,13 @@ services:
             - '../../../../../storage/aurora/soketi:/soketi'
         networks:
             aurora:
-                ipv4_address: 172.128.4.8
+                ipv4_address: 172.20.4.8
         command:
             - exit 1
         profiles:
             - sockets
-        entrypoint: [ "sh", "-c", "touch /soketi/config.json && node /app/bin/server.js start --config /soketi/config.json" ]
+        entrypoint:
+            ['sh', '-c', 'touch /soketi/config.json && node /app/bin/server.js start --config /soketi/config.json']
 
     postgres:
         image: postgres:16-alpine
@@ -124,7 +125,7 @@ services:
             - 127.0.0.1:5433:5432
         networks:
             aurora:
-                ipv4_address: 172.128.4.3
+                ipv4_address: 172.20.4.3
         volumes:
             - '../../../../../storage/aurora/mercury/database:/var/lib/postgresql/data'
             - '../../../../../storage/aurora/mercury/root:/root'
@@ -141,7 +142,7 @@ networks:
         driver: bridge
         ipam:
             config:
-                -   subnet: 172.128.0.0/16
+                - subnet: 172.20.0.0/16
 
 volumes:
     bootstrap_cache:
