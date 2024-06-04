@@ -72,7 +72,7 @@ class Mercury extends AbstractSingleton
 
         $this->auroraThread = $this->createAuroraThread();
 
-        if (! self::runningInProduction()) {
+        if (!self::runningInProduction()) {
             ConsoleLogger::log_info('Starting File Watcher...');
             $watcher = Watch::paths([base_path('.env')]);
 
@@ -80,15 +80,14 @@ class Mercury extends AbstractSingleton
                 ConsoleLogger::log_info("File updated: $file --> Restarting Aurora...", 'Mercury');
                 Artisan::call('config:cache');
                 $this->killAurora();
-                $watcher->shouldContinue(fn() => false);
+                $watcher->shouldContinue(fn () => false);
                 $this->auroraThread->stop();
             });
-
+            $watcher->shouldContinue(fn () => $this->auroraThread->getStatus() !== Process::STATUS_TERMINATED);
             $watcher->start();
         }
 
         $this->auroraThread->wait();
-
         return 1;
     }
 
@@ -104,7 +103,7 @@ class Mercury extends AbstractSingleton
         $process->setTty(posix_isatty(STDOUT));
         $process->start(
             posix_isatty(STDOUT) ? null :
-                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+                fn ($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
         );
         $process->wait();
     }
@@ -121,7 +120,7 @@ class Mercury extends AbstractSingleton
         $thread->setTty(posix_isatty(STDOUT));
         $thread->start(
             posix_isatty(STDOUT) ? null :
-                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+                fn ($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
         );
         $thread->setTimeout(null);
 
@@ -168,7 +167,7 @@ class Mercury extends AbstractSingleton
         $thread->setTty(posix_isatty(STDOUT));
 
         $watcher = null;
-        if (! self::runningInProduction()) {
+        if (!self::runningInProduction()) {
             ConsoleLogger::log_info('Starting File Watcher...', 'Mercury');
             $watcher = Watch::paths([
                 base_path('app/Jobs'),
@@ -198,9 +197,8 @@ class Mercury extends AbstractSingleton
 
         $thread->start(
             posix_isatty(STDOUT) ? null :
-                fn($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
+                fn ($type, $buffer) => fwrite(($type === Process::ERR ? STDERR : STDOUT), $buffer)
         );
-
 
         $watcher?->start();
         $thread->wait();
