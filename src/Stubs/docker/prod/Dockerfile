@@ -1,10 +1,10 @@
-FROM redis:7-alpine as redis
+FROM redis:7-alpine3.19 as redis
 
 RUN apk add --no-cache rsync && \
     rsync -avz /usr/local/bin/redis* /redis && \
     apk del --no-network rsync
 
-FROM postgres:16-alpine as postgres
+FROM postgres:16-alpine3.19 as postgres
 
 FROM mercury
 WORKDIR /srv/www/
