@@ -81,6 +81,8 @@ RUN su-exec aurora:1001 bash /mercury/prepare_prod.sh
 
 RUN touch /is_prod
 
+RUN ln -sf /sbin/su-exec /usr/local/bin/gosu
+
 VOLUME /root
 VOLUME /srv/www/storage
 VOLUME /srv/www/bootstrap/cache
