@@ -51,8 +51,7 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
         return unlink($source);
     }
 
-    $files = new RecursiveIteratorIterator
-    (
+    $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
     );
@@ -72,7 +71,6 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
                     return false;
                 }
             }
-
         }
     }
 
@@ -134,7 +132,7 @@ function rsync(string $source, string $destination, array $excluded_files = []):
 {
     $source = path_resolve($source);
 
-    $excluded = array_map(fn($item) => "'" . rtrim($item, DIRECTORY_SEPARATOR) . "'", $excluded_files);
+    $excluded = array_map(fn ($item) => "'" . rtrim($item, DIRECTORY_SEPARATOR) . "'", $excluded_files);
 
     $excluded = implode(',', $excluded);
     $excluded = "--exclude={{$excluded}}";
@@ -150,4 +148,19 @@ function rsync(string $source, string $destination, array $excluded_files = []):
     });
 
     return $process->wait();
+}
+
+
+/**
+ * Unlink a file if it exists
+ * @param string $filename
+ * @param resource|null $context
+ * @return bool
+ */
+function unlink_if_exists(string $filename, $context = null): bool
+{
+    if (file_exists($filename)) {
+        return unlink($filename, $context);
+    }
+    return true;
 }

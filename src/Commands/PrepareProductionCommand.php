@@ -7,6 +7,8 @@ use Minigyima\Aurora\Concerns\VerifiesEnvironment;
 use Minigyima\Aurora\Support\ConsoleLogger;
 use Minigyima\Aurora\Support\StrClean;
 
+use function Minigyima\Aurora\Support\unlink_if_exists;
+
 /**
  * PrepareProductionCommand - Command for preparing the production environment
  *
@@ -35,7 +37,7 @@ class PrepareProductionCommand extends Command
      */
     public function handle(): int
     {
-        if (! self::runningInMercury()) {
+        if (!self::runningInMercury()) {
             ConsoleLogger::log_error(
                 'This command can only be run in the Mercury environment',
                 'PrepareProductionCommand'
@@ -43,7 +45,7 @@ class PrepareProductionCommand extends Command
             return self::FAILURE;
         }
 
-        if (! self::runningInProduction()) {
+        if (!self::runningInProduction()) {
             ConsoleLogger::log_error(
                 'This command can only be run in the production environment',
                 'PrepareProductionCommand'
@@ -54,33 +56,33 @@ class PrepareProductionCommand extends Command
         ConsoleLogger::log_info('Preparing production environment...', 'PrepareProductionCommand');
 
         ConsoleLogger::log_trace('Checking if Cron is enabled...');
-        if (! config('aurora.scheduler_enabled')) {
+        if (!config('aurora.scheduler_enabled')) {
             ConsoleLogger::log_warning('Cron is not enabled. Removing config...', 'PrepareProductionCommand');
-            unlink('/etc/supervisor/conf.d/supervisord-20-cron.conf');
+            unlink_if_exists('/etc/supervisor/conf.d/supervisord-20-cron.conf');
         }
 
         ConsoleLogger::log_trace('Checking if Horizon is enabled...', 'PrepareProductionCommand');
-        if (! config('aurora.queue_enabled')) {
+        if (!config('aurora.queue_enabled')) {
             ConsoleLogger::log_warning('Horizon is not enabled. Removing config...', 'PrepareProductionCommand');
-            unlink('/etc/supervisor/conf.d/supervisord-30-queue.conf');
+            unlink_if_exists('/etc/supervisor/conf.d/supervisord-30-queue.conf');
         }
 
         ConsoleLogger::log_trace('Checking if Redis is enabled...', 'PrepareProductionCommand');
-        if (! config('aurora.redis_enabled')) {
+        if (!config('aurora.redis_enabled')) {
             ConsoleLogger::log_warning('Redis is not enabled. Removing config...', 'PrepareProductionCommand');
-            unlink('/etc/supervisor/conf.d/supervisord-40-redis.conf');
+            unlink_if_exists('/etc/supervisor/conf.d/supervisord-40-redis.conf');
         }
 
         ConsoleLogger::log_trace('Checking if Postgres is enabled...', 'PrepareProductionCommand');
-        if (! config('aurora.database_enabled')) {
+        if (!config('aurora.database_enabled')) {
             ConsoleLogger::log_warning('Postgres is not enabled. Removing config...', 'PrepareProductionCommand');
-            unlink('/etc/supervisor/conf.d/supervisord-50-postgres.conf');
+            unlink_if_exists('/etc/supervisor/conf.d/supervisord-50-postgres.conf');
         }
 
         ConsoleLogger::log_trace('Checking if Soketi is enabled...', 'PrepareProductionCommand');
-        if (! config('aurora.sockets_enabled')) {
+        if (!config('aurora.sockets_enabled')) {
             ConsoleLogger::log_warning('Soketi is not enabled. Removing config...', 'PrepareProductionCommand');
-            unlink('/etc/supervisor/conf.d/supervisord-70-soketi.conf');
+            unlink_if_exists('/etc/supervisor/conf.d/supervisord-70-soketi.conf');
         } else {
             ConsoleLogger::log_info('Soketi is enabled. Configuring...', 'PrepareProductionCommand');
             $app_name = str_replace([' ', '-'], ['_', '_'], StrClean::clean(strtolower(config('app.name'))));
