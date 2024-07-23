@@ -11,12 +11,12 @@ env_example=".env.example"
 app_name=$(cat $env_file | grep -m 1 APP_NAME= | sed -E 's/^APP_NAME=//')
 
 # Database configuration, parsed from .env file
-database_name=$(cat $env_file | grep -m 1 DB_DATABASE= | sed -E 's/^DB_DATABASE=//')
-database_host=$(cat $env_file | grep -m 1 DB_HOST= | sed -E 's/^DB_HOST=//')
-database_port=$(cat $env_file | grep -m 1 DB_PORT= | sed -E 's/^DB_PORT=//')
-database_user=$(cat $env_file | grep -m 1 DB_USERNAME= | sed -E 's/^DB_USERNAME=//')
-database_password=$(cat $env_file | grep -m 1 DB_PASSWORD= | sed -E 's/^DB_PASSWORD=//')
-database_driver=$(cat $env_file | grep -m 1 DB_CONNECTION= | sed -E 's/^DB_CONNECTION=//')
+database_name=$(cat $env_file | grep -m 1 '^DB_DATABASE=' | sed -E 's/^DB_DATABASE=//')
+database_host=$(cat $env_file | grep -m 1 '^DB_HOST=' | sed -E 's/^DB_HOST=//')
+database_port=$(cat $env_file | grep -m 1 '^DB_PORT=' | sed -E 's/^DB_PORT=//')
+database_user=$(cat $env_file | grep -m 1 '^DB_USERNAME=' | sed -E 's/^DB_USERNAME=//')
+database_password=$(cat $env_file | grep -m 1 '^DB_PASSWORD=' | sed -E 's/^DB_PASSWORD=//')
+database_driver=$(cat $env_file | grep -m 1 '^DB_CONNECTION=' | sed -E 's/^DB_CONNECTION=//')
 
 database_hash=$(echo -n "$database_name$database_host$database_port$database_user$database_password$database_driver" | md5sum | awk '{print $1}')
 
