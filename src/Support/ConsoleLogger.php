@@ -81,6 +81,12 @@ class ConsoleLogger
         self::log_stderr($formatter->apply($logMsg));
     }
 
+    /**
+     * Writes a message to STDERR
+     * - Environment agnostic, works in both Swoole and FPM.
+     * @param string $message
+     * @return void
+     */
     private static function log_stderr(string $message) {
         if(CheckForSwoole::check()) {
             fwrite(STDERR, $message);
