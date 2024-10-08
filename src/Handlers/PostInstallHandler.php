@@ -150,7 +150,15 @@ class PostInstallHandler
 
         if (file_exists(base_path('.gitignore'))) {
             $current_contents = file_get_contents(base_path('.gitignore'));
-            $ignored_files_aux = array_merge(explode("\n", trim($current_contents)), $ignored_files_aux);
+            $ignored_files_aux = array_unique(
+                array_merge(
+                    explode(
+                        "\n",
+                        trim($current_contents)
+                    ),
+                    $ignored_files_aux
+                )
+            );
         }
 
         file_put_contents(base_path('.gitignore'), implode("\n", $ignored_files_aux) . PHP_EOL);
