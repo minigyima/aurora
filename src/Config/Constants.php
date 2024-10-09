@@ -32,7 +32,7 @@ class Constants
     /**
      * Path to the aurora config file
      */
-    public const string CONFIG_FILE_PATH = self::AURORA_STORAGE_PATH . 'config.json';
+    public const string CONFIG_FILE_PATH = self::AURORA_STORAGE_PATH . '/config.json';
 
     /**
      * Path to the aurora soketi config file
