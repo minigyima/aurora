@@ -14,7 +14,7 @@ interface ConfigInterface
      * @param string $serialized JSON object containing the config data
      * @return static the config
      */
-    public static function load(string $serialized): self;
+    public static function load(string $serialized): static;
 
     /**
      * Get the default config

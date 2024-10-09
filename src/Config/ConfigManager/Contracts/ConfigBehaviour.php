@@ -22,7 +22,7 @@ trait ConfigBehaviour
      */
     public static function defaultState(): string
     {
-        return json_encode(self::defaultProps());
+        return json_encode(static::defaultProps());
     }
 
     /**
@@ -33,7 +33,7 @@ trait ConfigBehaviour
     private static function defaultProps(): array
     {
         $arr = [];
-        $reflect = new ReflectionClass(self::class);
+        $reflect = new ReflectionClass(static::class);
 
         foreach ($reflect->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $arr[$prop->getName()] = $prop->getDefaultValue();
@@ -48,18 +48,18 @@ trait ConfigBehaviour
      * @param string $serialized JSON object containing the config data
      * @return Config|ConfigBehaviour the config
      */
-    public static function load(string $serialized): self
+    public static function load(string $serialized): static
     {
         $deserialized = json_decode($serialized, true);
 
-        $class = new self();
-        $reflect = new ReflectionClass(self::class);
+        $class = new static();
+        $reflect = new ReflectionClass(static::class);
         foreach ($reflect->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $name = $prop->getName();
             if (isset($deserialized[$name])) {
                 $class->{$name} = $deserialized[$name];
             } else {
-                $class->{$name} = self::defaultProps()[$name];
+                $class->{$name} = static::defaultProps()[$name];
             }
         }
 
