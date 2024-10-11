@@ -5,8 +5,10 @@ namespace Minigyima\Aurora\Support\Response;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Http\JsonResponse;
+use InvalidArgumentException;
 use JsonSerializable;
 use stdClass;
+
 
 /**
  * AuroraResponse - Response class for Aurora
@@ -36,7 +38,7 @@ class AuroraResponse extends JsonResponse
 
     /**
      * AuroraResponse constructor.
-     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data
+     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string|Spatie\QueryBuilder\QueryBuilder $data
      * @param int $statusCode
      * @param array $headers
      * @param int $encodingOptions
@@ -45,13 +47,18 @@ class AuroraResponse extends JsonResponse
      * @param string $message
      */
     public function __construct(
-        array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data = [],
+        array|stdClass|Jsonable|JsonSerializable|Arrayable|string|Spatie\QueryBuilder\QueryBuilder $data = [],
         int                                                       $statusCode = 200,
         array                                                     $headers = [],
         int                                                       $encodingOptions = 0,
         bool                                                      $json = false,
         AuroraResponseStatus                                      $status = AuroraResponseStatus::SUCCESS,
         string                                                    $message = 'Success',
+        private int|null                                          $currentPage = null,
+        private int|null                                          $perPage = null,
+        private int|null                                          $totalRecords = null,
+        private int|null                                          $pages = null,
+
 
     ) {
         $this->encodingOptions = $encodingOptions;
@@ -62,11 +69,29 @@ class AuroraResponse extends JsonResponse
 
         $this->_data = $this->transformData($data);
 
-        parent::__construct([
+        $body = [
             'status' => $status,
             'message' => $message,
             'data' => $data,
-        ], $statusCode, $headers, false);
+        ];
+
+        if ($currentPage !== null) {
+            $body['page'] = $currentPage;
+        }
+
+        if ($perPage !== null) {
+            $body['perPage'] = $perPage;
+        }
+
+        if ($totalRecords !== null) {
+            $body['totalRecords'] = $totalRecords;
+        }
+
+        if ($pages !== null) {
+            $body['pages'] = $pages;
+        }
+
+        parent::__construct($body, $statusCode, $headers, false);
 
         $this->message = $message;
         $this->status = $status;
@@ -76,16 +101,18 @@ class AuroraResponse extends JsonResponse
 
     /**
      * Transform the data into an array
-     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable $data
+     * @param array|stdClass|Jsonable|JsonSerializable|ArrayablSpatie\QueryBuilder\QueryBuilder $data
      * @return array
      */
-    private function transformData(array|stdClass|Jsonable|JsonSerializable|Arrayable $data): array
+    private function transformData(array|stdClass|Jsonable|JsonSerializable|Arrayable|Spatie\QueryBuilder\QueryBuilder $data): array
     {
-        if (! is_array($data) &&
+        if (
+            ! is_array($data) &&
             ! ($data instanceof Jsonable) &&
             ! ($data instanceof JsonSerializable) &&
             ! ($data instanceof Arrayable) &&
-            ! ($data instanceof stdClass)) {
+            ! ($data instanceof stdClass)
+        ) {
             throw new InvalidArgumentException(
                 'Data must be an array, an instance of Jsonable, JsonSerializable, Arrayable, or stdClass',
             );
@@ -101,6 +128,14 @@ class AuroraResponse extends JsonResponse
 
         if ($data instanceof JsonSerializable) {
             return $data->jsonSerialize();
+        }
+
+        if ($data instanceof Spatie\QueryBuilder\QueryBuilder) {
+            $this->currentPage = $data->currentPage();
+            $this->perPage = $data->perPage();
+            $this->totalRecords = $data->total();
+            $this->pages = $data->lastPage();
+            return $data->items();
         }
 
         return (array) $data;
@@ -144,5 +179,4 @@ class AuroraResponse extends JsonResponse
 
         return $this;
     }
-
 }
