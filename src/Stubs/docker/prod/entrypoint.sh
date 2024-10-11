@@ -24,6 +24,9 @@ touch /var/log/supervisor/supervisord.log
 mkdir -p /var/log/nginx
 chown -R aurora:aurora /var/log/nginx
 
+mkdir -p /tmp/aurora
+chown -R aurora:aurora /tmp/aurora
+
 chown root:aurora /etc/nginx/nginx.conf
 chmod 640 /etc/nginx/nginx.conf
 

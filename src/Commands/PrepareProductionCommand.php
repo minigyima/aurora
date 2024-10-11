@@ -117,14 +117,20 @@ class PrepareProductionCommand extends Command
             file_put_contents('/etc/soketi-config.json', $soketi_config_json);
             ConsoleLogger::log_success('Soketi config written to /etc/soketi-config.json', 'PrepareProductionCommand');
 
-            ConsoleLogger::log_trace('Configuring nginx port...', 'PrepareProductionCommand');
+            ConsoleLogger::log_trace('Configuring Nginx for Soketi port...', 'PrepareProductionCommand');
             $nginx_config = file_get_contents('/etc/nginx/nginx.conf');
             $replace_string = 'http://127.0.0.1:6001';
             $replace_with = "http://127.0.0.1:$soketi_port";
-
             $nginx_config = str_replace($replace_string, $replace_with, $nginx_config);
+
+            ConsoleLogger::log_trace('Configuring the UNIX socket...', 'PrepareProductionCommand');
+            $sock_replace = "unix:/tmp/aurora/aurora.sock;";
+            $sock_name = config('aurora.unix_socket_name');
+            $sock_with = "unix:/tmp/aurora/$sock_name;";
+            $nginx_config = str_replace($sock_replace, $sock_with, $nginx_config);
+
             file_put_contents('/etc/nginx/nginx.conf', $nginx_config);
-            ConsoleLogger::log_success('Nginx port configured', 'PrepareProductionCommand');
+            ConsoleLogger::log_success('Nginx configured', 'PrepareProductionCommand');
         }
 
         ConsoleLogger::log_success('Production environment prepared', 'PrepareProductionCommand');

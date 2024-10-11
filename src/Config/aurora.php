@@ -187,4 +187,15 @@ return [
     */
     'docker_registry_namespace' => env('AURORA_DOCKER_REGISTRY_NAMESPACE', ''),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | UNIX Socket Name
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the name of the UNIX socket
+    |
+    */
+    'unix_socket_name' => env('AURORA_UNIX_SOCKET_NAME', 'aurora.sock'),
+
 ];
