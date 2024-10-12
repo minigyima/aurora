@@ -2,6 +2,7 @@
 
 namespace Minigyima\Aurora\Support\Response;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Http\JsonResponse;
@@ -47,7 +48,7 @@ class AuroraResponse extends JsonResponse
      * @param string $message
      */
     public function __construct(
-        array|stdClass|Jsonable|JsonSerializable|Arrayable|string|Spatie\QueryBuilder\QueryBuilder $data = [],
+        array|stdClass|Jsonable|JsonSerializable|Arrayable|string|LengthAwarePaginator $data = [],
         int                                                       $statusCode = 200,
         array                                                     $headers = [],
         int                                                       $encodingOptions = 0,
@@ -69,11 +70,19 @@ class AuroraResponse extends JsonResponse
 
         $this->_data = $this->transformData($data);
 
-        $body = [
-            'status' => $status,
-            'message' => $message,
-            'data' => $data,
-        ];
+        if ($status === AuroraResponseStatus::FAIL) {
+            $body = [
+                'status' => $status,
+                'message' => $message,
+                'errors' => $data,
+            ];
+        } else {
+            $body = [
+                'status' => $status,
+                'message' => $message,
+                'data' => $data,
+            ];
+        }
 
         if ($currentPage !== null) {
             $body['page'] = $currentPage;
@@ -101,10 +110,10 @@ class AuroraResponse extends JsonResponse
 
     /**
      * Transform the data into an array
-     * @param array|stdClass|Jsonable|JsonSerializable|ArrayablSpatie\QueryBuilder\QueryBuilder $data
+     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|LengthAwarePaginator $data
      * @return array
      */
-    private function transformData(array|stdClass|Jsonable|JsonSerializable|Arrayable|Spatie\QueryBuilder\QueryBuilder $data): array
+    private function transformData(array|stdClass|Jsonable|JsonSerializable|Arrayable|LengthAwarePaginator $data): array
     {
         if (
             ! is_array($data) &&
@@ -130,7 +139,7 @@ class AuroraResponse extends JsonResponse
             return $data->jsonSerialize();
         }
 
-        if ($data instanceof Spatie\QueryBuilder\QueryBuilder) {
+        if ($data instanceof LengthAwarePaginator) {
             $this->currentPage = $data->currentPage();
             $this->perPage = $data->perPage();
             $this->totalRecords = $data->total();

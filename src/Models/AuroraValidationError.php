@@ -20,8 +20,6 @@ readonly class AuroraValidationError implements JsonSerializable
     #[Override]
     public function jsonSerialize(): array
     {
-        return [
-            'errors' => $this->errors,
-        ];
+        return $this->errors;
     }
 }
