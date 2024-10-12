@@ -11,6 +11,7 @@ namespace Minigyima\Aurora\Support;
 # https://gist.github.com/XzaR90/48c6b615be12fa765898
 # Forked from https://gist.github.com/mindplay-dk/a4aad91f5a4f1283a5e2
 use FilesystemIterator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;
@@ -83,7 +84,7 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
 
 /**
  * Create a new AuroraResponse instance.
- * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data
+ * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string|LengthAwarePaginator $data
  * @param int $statusCode
  * @param array $headers
  * @param int $encodingOptions
@@ -93,7 +94,7 @@ function rrmdir(string $source, bool $removeOnlyChildren = false): bool
  * @return AuroraResponse
  */
 function aurora_response(
-    array|stdClass|Jsonable|JsonSerializable|Arrayable|string $data = [],
+    array|stdClass|Jsonable|JsonSerializable|Arrayable|string|LengthAwarePaginator $data = [],
     int                                                       $statusCode = 200,
     array                                                     $headers = [],
     int                                                       $encodingOptions = 0,
