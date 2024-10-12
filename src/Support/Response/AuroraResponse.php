@@ -120,11 +120,20 @@ class AuroraResponse extends JsonResponse
             ! ($data instanceof Jsonable) &&
             ! ($data instanceof JsonSerializable) &&
             ! ($data instanceof Arrayable) &&
-            ! ($data instanceof stdClass)
+            ! ($data instanceof stdClass) &&
+            ! ($data instanceof LengthAwarePaginator)
         ) {
             throw new InvalidArgumentException(
                 'Data must be an array, an instance of Jsonable, JsonSerializable, Arrayable, or stdClass',
             );
+        }
+
+        if ($data instanceof LengthAwarePaginator) {
+            $this->currentPage = $data->currentPage();
+            $this->perPage = $data->perPage();
+            $this->totalRecords = $data->total();
+            $this->pages = $data->lastPage();
+            return $data->items();
         }
 
         if ($data instanceof Arrayable) {
@@ -137,14 +146,6 @@ class AuroraResponse extends JsonResponse
 
         if ($data instanceof JsonSerializable) {
             return $data->jsonSerialize();
-        }
-
-        if ($data instanceof LengthAwarePaginator) {
-            $this->currentPage = $data->currentPage();
-            $this->perPage = $data->perPage();
-            $this->totalRecords = $data->total();
-            $this->pages = $data->lastPage();
-            return $data->items();
         }
 
         return (array) $data;
