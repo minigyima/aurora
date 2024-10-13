@@ -10,7 +10,6 @@ use InvalidArgumentException;
 use JsonSerializable;
 use stdClass;
 
-
 /**
  * AuroraResponse - Response class for Aurora
  *  - Loosely follows the JSend specification
@@ -18,7 +17,6 @@ use stdClass;
  */
 class AuroraResponse extends JsonResponse
 {
-
     /**
      * The message of the response
      * @var string
@@ -49,18 +47,16 @@ class AuroraResponse extends JsonResponse
      */
     public function __construct(
         array|stdClass|Jsonable|JsonSerializable|Arrayable|string|LengthAwarePaginator $data = [],
-        int                                                       $statusCode = 200,
-        array                                                     $headers = [],
-        int                                                       $encodingOptions = 0,
-        bool                                                      $json = false,
-        AuroraResponseStatus                                      $status = AuroraResponseStatus::SUCCESS,
-        string                                                    $message = 'Success',
-        private int|null                                          $currentPage = null,
-        private int|null                                          $perPage = null,
-        private int|null                                          $totalRecords = null,
-        private int|null                                          $pages = null,
-
-
+        int $statusCode = 200,
+        array $headers = [],
+        int $encodingOptions = 0,
+        bool $json = false,
+        AuroraResponseStatus $status = AuroraResponseStatus::SUCCESS,
+        string $message = 'Success',
+        private int|null $currentPage = null,
+        private int|null $perPage = null,
+        private int|null $totalRecords = null,
+        private int|null $pages = null
     ) {
         $this->encodingOptions = $encodingOptions;
 
@@ -74,30 +70,30 @@ class AuroraResponse extends JsonResponse
             $body = [
                 'status' => $status,
                 'message' => $message,
-                'errors' => $data,
+                'errors' => $this->_data,
             ];
         } else {
             $body = [
                 'status' => $status,
                 'message' => $message,
-                'data' => $data,
+                'data' => $this->_data,
             ];
         }
 
-        if ($currentPage !== null) {
-            $body['page'] = $currentPage;
+        if ($this->currentPage !== null) {
+            $body['page'] = $this->currentPage;
         }
 
-        if ($perPage !== null) {
-            $body['perPage'] = $perPage;
+        if ($this->perPage !== null) {
+            $body['perPage'] = $this->perPage;
         }
 
-        if ($totalRecords !== null) {
-            $body['totalRecords'] = $totalRecords;
+        if ($this->totalRecords !== null) {
+            $body['totalRecords'] = $this->totalRecords;
         }
 
-        if ($pages !== null) {
-            $body['pages'] = $pages;
+        if ($this->pages !== null) {
+            $body['pages'] = $this->pages;
         }
 
         parent::__construct($body, $statusCode, $headers, false);
@@ -113,18 +109,19 @@ class AuroraResponse extends JsonResponse
      * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|LengthAwarePaginator $data
      * @return array
      */
-    private function transformData(array|stdClass|Jsonable|JsonSerializable|Arrayable|LengthAwarePaginator $data): array
-    {
+    private function transformData(
+        array|stdClass|Jsonable|JsonSerializable|Arrayable|LengthAwarePaginator $data
+    ): array {
         if (
-            ! is_array($data) &&
-            ! ($data instanceof Jsonable) &&
-            ! ($data instanceof JsonSerializable) &&
-            ! ($data instanceof Arrayable) &&
-            ! ($data instanceof stdClass) &&
-            ! ($data instanceof LengthAwarePaginator)
+            !is_array($data) &&
+            !($data instanceof Jsonable) &&
+            !($data instanceof JsonSerializable) &&
+            !($data instanceof Arrayable) &&
+            !($data instanceof stdClass) &&
+            !($data instanceof LengthAwarePaginator)
         ) {
             throw new InvalidArgumentException(
-                'Data must be an array, an instance of Jsonable, JsonSerializable, Arrayable, or stdClass',
+                'Data must be an array, an instance of Jsonable, JsonSerializable, Arrayable, or stdClass'
             );
         }
 
@@ -170,11 +167,19 @@ class AuroraResponse extends JsonResponse
      */
     private function sync(): void
     {
-        $this->setData([
-            'status' => $this->status,
-            'message' => $this->message,
-            'data' => $this->_data,
-        ]);
+        if ($this->status === AuroraResponseStatus::FAIL) {
+            $this->setData([
+                'status' => $this->status,
+                'message' => $this->message,
+                'errors' => $this->_data,
+            ]);
+        } else {
+            $this->setData([
+                'status' => $this->status,
+                'message' => $this->message,
+                'data' => $this->_data,
+            ]);
+        }
     }
 
     /**

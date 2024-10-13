@@ -27,7 +27,7 @@ class RefreshToken extends Model
      * _Laravel Sanctum style_
      *
      * @param string $plainToken
-     * @return void
+     * @return RefreshToken|null
      */
     public static function findToken(string $plainToken)
     {
@@ -50,6 +50,7 @@ class RefreshToken extends Model
     public function tryUsing(): bool
     {
         if ($this->expires_at < time()) {
+            $this->delete();
             throw new RefreshTokenExpiredException();
         }
 
