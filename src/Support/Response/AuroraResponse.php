@@ -37,7 +37,7 @@ class AuroraResponse extends JsonResponse
 
     /**
      * AuroraResponse constructor.
-     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string|Spatie\QueryBuilder\QueryBuilder $data
+     * @param array|stdClass|Jsonable|JsonSerializable|Arrayable|string|LengthAwarePaginator $data
      * @param int $statusCode
      * @param array $headers
      * @param int $encodingOptions
