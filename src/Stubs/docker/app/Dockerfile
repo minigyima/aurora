@@ -78,6 +78,8 @@ RUN MAKEFLAGS="-j$(nproc)" pecl install redis
 RUN MAKEFLAGS="-j$(nproc)" pecl install xdebug
 RUN MAKEFLAGS="-j$(nproc)" pecl install openswoole-22.1.2
 RUN MAKEFLAGS="-j$(nproc)" pecl install apcu
+RUN MAKEFLAGS="-j$(nproc)" pecl install mongodb
+
 
 RUN git clone https://github.com/Imagick/imagick && \
     cd imagick && \
@@ -87,7 +89,7 @@ RUN git clone https://github.com/Imagick/imagick && \
     cd .. && \
     rm -rf imagick
 
-RUN docker-php-ext-enable redis imagick gd dom openswoole apcu
+RUN docker-php-ext-enable redis imagick gd dom openswoole apcu mongodb
 
 RUN . /envfile; docker-php-ext-configure intl && docker-php-ext-install -j$PROC_COUNT intl
 
