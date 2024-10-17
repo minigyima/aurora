@@ -68,6 +68,7 @@ RUN . /envfile; docker-php-ext-install -j$PROC_COUNT bcmath \
     sysvmsg \
     sysvsem \
     sysvshm \
+    sockets \
     posix
 
 
