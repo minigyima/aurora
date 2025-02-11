@@ -128,7 +128,7 @@ class ConfigureDatabase extends Command
 
         $confirmed = confirm(
             'Would you like to persist these changes?',
-            default: false,
+            default: true,
             hint: $write_override ? 'docker-compose.override.yaml and .env will get updated.' : '.env will get updated.'
         );
 
@@ -219,7 +219,7 @@ class ConfigureDatabase extends Command
     {
         $prompt = confirm(
             'Would you like to clear the Postgres data?',
-            default: false,
+            default: true,
             hint: 'This will delete all data in the Postgres database.'
         );
 
@@ -245,7 +245,7 @@ class ConfigureDatabase extends Command
     {
         $confirm = confirm(
             'Are you sure you want to automatically configure the database? This will overwrite any existing database configuration.',
-            default: false,
+            default: true,
 
         );
 
